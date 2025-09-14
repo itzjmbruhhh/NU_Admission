@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NU Lipa Smart Admission</title>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+</head>
+<body>
+    <div class="slider-container">
+        <div class="slide active" style="background-image: url('{% static "img/OIP (1).jpg" %}')"></div>
+<div class="slide" style="background-image: url('{% static "img/img2.jpg" %}')"></div>
+<div class="slide" style="background-image: url('{% static "img/img1.jpg" %}')"></div>
+<div class="slide" style="background-image: url('{% static "img/OIP (1).jpg" %}')"></div>
+    </div>
+    
+    <div class="overlay"></div>
+    
+    <div class="content">
+        <div class="welcome-container">
+            <div class="logo-container">
+                <h1 class="logo">NU LIPA</h1>
+                <p class="subtitle">Smart Admission System</p>
+            </div>
+            
+            <div class="welcome-message">
+                <h2>Welcome to NUQuest!</h2>
+                <p>Start your journey in becoming a Nationalian today!</p>
+                <div class="loading-spinner"></div>
+                <p class="redirect-text">Redirecting you to registration in <span id="countdown">5</span> seconds...</p>
+            </div>
+        </div>
+        
+        <div class="admin-section">
+            <button class="admin-btn" onclick="window.location.href='login'">
+                <span>Admin Login</span>
+                <i class="admin-icon">👤</i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Image slider functionality
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+        
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+        
+        setInterval(nextSlide, 3000);
+        
+        // Countdown and redirect functionality
+        let countdown = 5;
+        const countdownElement = document.getElementById('countdown');
+        
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = 'register';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
