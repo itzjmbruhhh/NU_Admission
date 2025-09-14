@@ -30,6 +30,9 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+IMPORT_EXPORT_USE_TRANSACTIONS = False
+
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'admissions'
+    'admissions',
+    'import_export'
 ]
 
 MIDDLEWARE = [

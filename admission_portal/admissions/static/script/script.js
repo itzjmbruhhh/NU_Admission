@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
 
             setTimeout(() => {
-                window.location.href = "admin.html"; // redirect
+                window.location.href = "/adminDash/"; // redirect
             }, 1500);
         } else {
             showNotification("Invalid username or password!", "error");

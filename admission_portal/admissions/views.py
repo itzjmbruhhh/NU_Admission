@@ -70,7 +70,8 @@ def register_student(request):
             current_city=city_province,
             current_postal_code=zip_code,
             last_school_attended="",  # optional for now
-            requirement_agreement=True if truthful_info and data_privacy else False
+            requirement_agreement=True if truthful_info and data_privacy else False,
+            enrolled=""
         )
         student.save()
         return redirect("index")  # redirect to homepage after success
