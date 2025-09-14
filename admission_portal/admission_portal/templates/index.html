@@ -10,9 +10,9 @@
 <body>
     <div class="slider-container">
         <div class="slide active" style="background-image: url('{% static "img/OIP (1).jpg" %}')"></div>
-<div class="slide" style="background-image: url('{% static "img/img2.jpg" %}')"></div>
-<div class="slide" style="background-image: url('{% static "img/img1.jpg" %}')"></div>
-<div class="slide" style="background-image: url('{% static "img/OIP (1).jpg" %}')"></div>
+        <div class="slide" style="background-image: url('{% static "img/img2.jpg" %}')"></div>
+        <div class="slide" style="background-image: url('{% static "img/img1.jpg" %}')"></div>
+        <div class="slide" style="background-image: url('{% static "img/OIP (1).jpg" %}')"></div>
     </div>
     
     <div class="overlay"></div>
@@ -33,7 +33,7 @@
         </div>
         
         <div class="admin-section">
-            <button class="admin-btn" onclick="window.location.href='login'">
+            <button class="admin-btn" onclick="window.location.href='loginAdmin'">
                 <span>Admin Login</span>
                 <i class="admin-icon">👤</i>
             </button>
@@ -63,7 +63,7 @@
             
             if (countdown <= 0) {
                 clearInterval(countdownInterval);
-                window.location.href = 'register';
+                window.location.href = '/register';
             }
         }, 1000);
     </script>

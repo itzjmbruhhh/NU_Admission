@@ -17,11 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from admissions import views
-from admissions.views import index
+from admissions.views import index, loginAdmin, adminLanding, register
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path("register/", views.register_student, name="register_student"),
+    path('super_admin/', admin.site.urls),
+    path('loginAdmin/', loginAdmin, name='loginAdmin'),
+    path('adminDash/', adminLanding, name='landingAdmin'),
+    path('register/', register, name='register'),
     path('', index, name='index')
 
 ]

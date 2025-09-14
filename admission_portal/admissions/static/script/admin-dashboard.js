@@ -178,8 +178,7 @@ window.showSection = showSection;
 // Logout (placeholder)
 // ==========================
 function logout() {
-  // Redirect to index.html
-  window.location.href = "index.html";
+  window.location.href = "/";
 }
 window.logout = logout;
 // ==========================

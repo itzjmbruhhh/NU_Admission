@@ -1,9 +1,21 @@
 # admissions/views.py
 from django.shortcuts import render, redirect
 from .models import Student
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+
 
 def index(request):
     return render(request, 'index.html')
+
+def loginAdmin(request):
+    return render(request, 'login.html')
+
+def adminLanding(request):
+    return render(request, 'admin.html')
+
+def register(request):
+    return render(request, 'registration.html')
 
 def register_student(request):
     if request.method == "POST":
