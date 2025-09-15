@@ -117,6 +117,9 @@
               </div>
               <canvas id="yearChart"></canvas>
             </div>
+            {% load static %}
+            {{ academic_year_labels|json_script:"academic-year-labels" }}
+            {{ academic_year_data|json_script:"academic-year-data" }}
 
             <!-- Program Popularity (Pie with %) -->
             <div class="chart-container medium">

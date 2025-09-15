@@ -41,17 +41,44 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // ==========================
-  // Academic Year Distribution
+  // Academic Year Distribution (actual data)
   // ==========================
+  // Use json_script data for academic year chart
+  let academicYearLabels = JSON.parse(
+    document.getElementById("academic-year-labels").textContent
+  );
+  let academicYearData = JSON.parse(
+    document.getElementById("academic-year-data").textContent
+  );
+  // Generate a color for each year
+  function getColorPalette(n) {
+    const palette = [
+      "#1e40af",
+      "#FFD700",
+      "#059669",
+      "#0891b2",
+      "#dc2626",
+      "#e65959",
+      "#6366f1",
+      "#f59e42",
+      "#10b981",
+      "#f43f5e",
+    ];
+    let colors = [];
+    for (let i = 0; i < n; i++) {
+      colors.push(palette[i % palette.length]);
+    }
+    return colors;
+  }
   new Chart(document.getElementById("yearChart").getContext("2d"), {
     type: "bar",
     data: {
-      labels: ["2024-2025", "2025-2026", "2026-2027"],
+      labels: academicYearLabels,
       datasets: [
         {
           label: "No. of Students",
-          data: [200, 250, 180],
-          backgroundColor: "#1e40af",
+          data: academicYearData,
+          backgroundColor: getColorPalette(academicYearLabels.length),
         },
       ],
     },
