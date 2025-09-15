@@ -1,293 +1,355 @@
 {% load static %}
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Smart Admission — Admin Dashboard</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/admin_chart.css' %}">
-</head>
-<body>
-<div class="admin-page">
-  <!-- Header -->
-  <header class="header">
-    <div class="header-content">
-      <div class="header-left">
-        <div class="header-title">
-          <h1>Smart Admission System</h1>
-          <p>Admin Dashboard</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Smart Admission — Admin Dashboard</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'css/admin_chart.css' %}" />
+  </head>
+  <body>
+    <div class="admin-page">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <div class="header-left">
+            <div class="header-title">
+              <h1>Smart Admission System</h1>
+              <p>Admin Dashboard</p>
+            </div>
+          </div>
+          <nav class="header-nav">
+            <span class="nav-link active"
+              ><i class="fas fa-tachometer-alt"></i> Dashboard</span
+            >
+            <span class="nav-link" id="adminName">Welcome, Admin!</span>
+          </nav>
         </div>
-      </div>
-      <nav class="header-nav">
-        <span class="nav-link active"><i class="fas fa-tachometer-alt"></i> Dashboard</span>
-        <span class="nav-link" id="adminName">Welcome, Admin!</span>
-      </nav>
+      </header>
+
+      <!-- Floating Logout -->
+      <a href="#" class="floating-admin-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+
+      <main class="dashboard-container">
+        <!-- Section Navigation -->
+        <section class="section-tabs">
+          <button class="tab-btn active" onclick="showSection('overview')">
+            <i class="fas fa-chart-line"></i> Overview & Analytics
+          </button>
+          <button class="tab-btn" onclick="showSection('search')">
+            <i class="fas fa-search"></i> Student Records
+          </button>
+          <button class="tab-btn" onclick="showSection('reports')">
+            <i class="fas fa-file-alt"></i> Reports & Export
+          </button>
+        </section>
+
+        <!-- ✅ Overview Section -->
+        <div id="overview" class="section-content active">
+          <!-- Summary Cards -->
+          <section class="summary-grid">
+            <div class="summary-card primary">
+              <div class="card-icon"><i class="fas fa-users"></i></div>
+              <div class="card-content">
+                <h2>450</h2>
+                <p>Total Students</p>
+                <span class="trend up"
+                  ><i class="fas fa-arrow-up"></i> 12% from last month</span
+                >
+              </div>
+            </div>
+            <div class="summary-card success">
+              <div class="card-icon"><i class="fas fa-male"></i></div>
+              <div class="card-content">
+                <h2>220</h2>
+                <p>Male Students</p>
+                <span class="trend neutral">49% of total</span>
+              </div>
+            </div>
+            <div class="summary-card warning">
+              <div class="card-icon"><i class="fas fa-female"></i></div>
+              <div class="card-content">
+                <h2>230</h2>
+                <p>Female Students</p>
+                <span class="trend neutral">51% of total</span>
+              </div>
+            </div>
+            <div class="summary-card info">
+              <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
+              <div class="card-content">
+                <h2>BSCS</h2>
+                <p>Top Program</p>
+                <span class="trend up"
+                  ><i class="fas fa-star"></i> Most popular</span
+                >
+              </div>
+            </div>
+          </section>
+
+          <!-- Charts Grid -->
+          <section class="charts-grid">
+            <!-- Enrollment Trends -->
+            <div class="chart-container large">
+              <div class="chart-header">
+                <h3><i class="fas fa-chart-area"></i> Enrollment Trends</h3>
+                <div class="chart-controls">
+                  <select id="trendPeriod">
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
+              </div>
+              <canvas id="enrollmentTrendChart"></canvas>
+            </div>
+
+            <!-- Academic Year Distribution -->
+            <div class="chart-container medium">
+              <div class="chart-header">
+                <h3>
+                  <i class="fas fa-calendar-alt"></i> Academic Year Distribution
+                </h3>
+              </div>
+              <canvas id="yearChart"></canvas>
+            </div>
+
+            <!-- Program Popularity (Pie with %) -->
+            <div class="chart-container medium">
+              <div class="chart-header">
+                <h3><i class="fas fa-book"></i> Program Popularity</h3>
+              </div>
+              <canvas id="programChart"></canvas>
+            </div>
+
+            <!-- Admission Success Rate -->
+            <div class="chart-container medium">
+              <div class="chart-header">
+                <h3>
+                  <i class="fas fa-percentage"></i> Admission Success Rate
+                </h3>
+              </div>
+              <canvas id="admissionChart"></canvas>
+            </div>
+          </section>
+        </div>
+
+        <!-- ✅ Student Records Section -->
+        <div id="search" class="section-content">
+          <section class="search-section">
+            <div class="search-header">
+              <h3><i class="fas fa-search"></i> Advanced Student Search</h3>
+            </div>
+            <div class="search-filters">
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label>Search by Name/ID</label>
+                  <input
+                    type="text"
+                    id="nameSearch"
+                    placeholder="Enter student name or ID"
+                  />
+                </div>
+                <div class="filter-group">
+                  <label>Program</label>
+                  <select id="programFilter">
+                    <option value="">All Programs</option>
+                    <option value="BSCS">BSCS</option>
+                    <option value="BSIT">BSIT</option>
+                    <option value="BSCE">BSCE</option>
+                    <option value="BSBA">BSBA</option>
+                  </select>
+                </div>
+              </div>
+              <div class="filter-actions">
+                <button id="searchBtn" class="btn primary">
+                  <i class="fas fa-search"></i> Search
+                </button>
+                <button id="resetBtn" class="btn secondary">
+                  <i class="fas fa-refresh"></i> Reset
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="records-section">
+            <div class="records-header">
+              <h3><i class="fas fa-table"></i> Student Records</h3>
+              <div class="records-actions">
+                <button class="btn success" onclick="exportData('excel')">
+                  <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+                <button class="btn primary" onclick="exportData('pdf')">
+                  <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
+              </div>
+            </div>
+
+            <!-- Student Table -->
+            <div class="table-container">
+              <table id="studentTable" class="modern-table">
+                <thead>
+                  <tr>
+                    <th><input type="checkbox" id="selectAll" /></th>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Program</th>
+                    <th>Enrollment Chance</th>
+                    <th>Status</th>
+                    <th>School Year</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for student in students %}
+                  <tr>
+                    <td><input type="checkbox" class="row-select" /></td>
+                    <td>{{ student.student_id }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>
+                      <span class="program-badge bscs"
+                        >{{ student.program_first_choice }}</span
+                      >
+                    </td>
+                    <td>
+                      <span class="chance-badge high"
+                        >{{ student.enrollment_chance }}</span
+                      >
+                    </td>
+                    <td>
+                      {% if student.student_id %}
+                      <span
+                        class="status-badge enrolled"
+                        style="background: #059669; color: #fff"
+                        >Enrolled</span
+                      >
+                      {% else %}
+                      <span
+                        class="status-badge not-enrolled"
+                        style="background: #c73838; color: #fff"
+                        >Not Enrolled</span
+                      >
+                      {% endif %}
+                    </td>
+                    <td>{{ student.school_year }}</td>
+                    <td class="action-buttons">
+                      <button class="btn-icon view">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button class="btn-icon edit">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn-icon delete">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="9">No student records found.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+
+              <div id="noResults" class="no-results" style="display: none">
+                <i class="fas fa-search"></i>
+                <p>No results found for your search criteria.</p>
+              </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+              {% if students.has_previous %}
+              <a
+                class="btn secondary"
+                href="?page={{ students.previous_page_number }}"
+              >
+                <i class="fas fa-chevron-left"></i> Previous
+              </a>
+              {% else %}
+              <span class="btn secondary" disabled>
+                <i class="fas fa-chevron-left"></i> Previous
+              </span>
+              {% endif %}
+              <span class="page-info">Page {{ students.number }} of {{ students.paginator.num_pages}}</span>
+              {% if students.has_next %}
+              <a
+                class="btn secondary"
+                href="?page={{ students.next_page_number }}"
+              >
+                Next <i class="fas fa-chevron-right"></i>
+              </a>
+              {% else %}
+              <span class="btn secondary" disabled>
+                Next <i class="fas fa-chevron-right"></i>
+              </span>
+              {% endif %}
+            </div>
+          </section>
+        </div>
+
+        <!-- ✅ Reports Section -->
+        <div id="reports" class="section-content">
+          <section class="reports-grid">
+            <div class="report-card">
+              <div class="report-icon"><i class="fas fa-chart-bar"></i></div>
+              <div class="report-content">
+                <h3>Admission Analytics Report</h3>
+                <p>
+                  Comprehensive analysis of admission trends, success rates, and
+                  demographic data.
+                </p>
+                <div class="report-actions">
+                  <button class="btn primary">Generate Report</button>
+                  <button class="btn secondary">Schedule</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="report-card">
+              <div class="report-icon"><i class="fas fa-users"></i></div>
+              <div class="report-content">
+                <h3>Student Demographics</h3>
+                <p>
+                  Detailed breakdown of student population by program, location,
+                  and other factors.
+                </p>
+                <div class="report-actions">
+                  <button class="btn primary">Generate Report</button>
+                  <button class="btn secondary">Schedule</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="report-card">
+              <div class="report-icon">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <div class="report-content">
+                <h3>Program Performance</h3>
+                <p>
+                  Analysis of program popularity, capacity utilization, and
+                  success metrics.
+                </p>
+                <div class="report-actions">
+                  <button class="btn primary">Generate Report</button>
+                  <button class="btn secondary">Schedule</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
     </div>
-  </header>
 
-  <!-- Floating Logout -->
-  <a href="#" class="floating-admin-btn" onclick="logout()">
-    <i class="fas fa-sign-out-alt"></i> Logout
-  </a>
-
-  <main class="dashboard-container">
-    <!-- Section Navigation -->
-    <section class="section-tabs">
-      <button class="tab-btn active" onclick="showSection('overview')">
-        <i class="fas fa-chart-line"></i> Overview & Analytics
-      </button>
-      <button class="tab-btn" onclick="showSection('search')">
-        <i class="fas fa-search"></i> Student Records
-      </button>
-      <button class="tab-btn" onclick="showSection('reports')">
-        <i class="fas fa-file-alt"></i> Reports & Export
-      </button>
-    </section>
-
-    <!-- ✅ Overview Section -->
-    <div id="overview" class="section-content active">
-      <!-- Summary Cards -->
-      <section class="summary-grid">
-        <div class="summary-card primary">
-          <div class="card-icon"><i class="fas fa-users"></i></div>
-          <div class="card-content">
-            <h2>450</h2>
-            <p>Total Students</p>
-            <span class="trend up"><i class="fas fa-arrow-up"></i> 12% from last month</span>
-          </div>
-        </div>
-        <div class="summary-card success">
-          <div class="card-icon"><i class="fas fa-male"></i></div>
-          <div class="card-content">
-            <h2>220</h2>
-            <p>Male Students</p>
-            <span class="trend neutral">49% of total</span>
-          </div>
-        </div>
-        <div class="summary-card warning">
-          <div class="card-icon"><i class="fas fa-female"></i></div>
-          <div class="card-content">
-            <h2>230</h2>
-            <p>Female Students</p>
-            <span class="trend neutral">51% of total</span>
-          </div>
-        </div>
-        <div class="summary-card info">
-          <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
-          <div class="card-content">
-            <h2>BSCS</h2>
-            <p>Top Program</p>
-            <span class="trend up"><i class="fas fa-star"></i> Most popular</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Charts Grid -->
-      <section class="charts-grid">
-        <!-- Enrollment Trends -->
-        <div class="chart-container large">
-          <div class="chart-header">
-            <h3><i class="fas fa-chart-area"></i> Enrollment Trends</h3>
-            <div class="chart-controls">
-              <select id="trendPeriod">
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
-            </div>
-          </div>
-          <canvas id="enrollmentTrendChart"></canvas>
-        </div>
-
-        <!-- Academic Year Distribution -->
-        <div class="chart-container medium">
-          <div class="chart-header">
-            <h3><i class="fas fa-calendar-alt"></i> Academic Year Distribution</h3>
-          </div>
-          <canvas id="yearChart"></canvas>
-        </div>
-
-        <!-- Program Popularity (Pie with %) -->
-        <div class="chart-container medium">
-          <div class="chart-header">
-            <h3><i class="fas fa-book"></i> Program Popularity</h3>
-          </div>
-          <canvas id="programChart"></canvas>
-        </div>
-
-        <!-- Admission Success Rate -->
-        <div class="chart-container medium">
-          <div class="chart-header">
-            <h3><i class="fas fa-percentage"></i> Admission Success Rate</h3>
-          </div>
-          <canvas id="admissionChart"></canvas>
-        </div>
-      </section>
-    </div>
-
-    <!-- ✅ Student Records Section -->
-    <div id="search" class="section-content">
-      <section class="search-section">
-        <div class="search-header">
-          <h3><i class="fas fa-search"></i> Advanced Student Search</h3>
-        </div>
-        <div class="search-filters">
-          <div class="filter-row">
-            <div class="filter-group">
-              <label>Search by Name/ID</label>
-              <input type="text" id="nameSearch" placeholder="Enter student name or ID">
-            </div>
-            <div class="filter-group">
-              <label>Program</label>
-              <select id="programFilter">
-                <option value="">All Programs</option>
-                <option value="BSCS">BSCS</option>
-                <option value="BSIT">BSIT</option>
-                <option value="BSCE">BSCE</option>
-                <option value="BSBA">BSBA</option>
-              </select>
-            </div>
-          </div>
-          <div class="filter-actions">
-            <button id="searchBtn" class="btn primary">
-              <i class="fas fa-search"></i> Search
-            </button>
-            <button id="resetBtn" class="btn secondary">
-              <i class="fas fa-refresh"></i> Reset
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section class="records-section">
-        <div class="records-header">
-          <h3><i class="fas fa-table"></i> Student Records</h3>
-          <div class="records-actions">
-            <button class="btn success" onclick="exportData('excel')">
-              <i class="fas fa-file-excel"></i> Export Excel
-            </button>
-            <button class="btn primary" onclick="exportData('pdf')">
-              <i class="fas fa-file-pdf"></i> Export PDF
-            </button>
-          </div>
-        </div>
-
-        <!-- Student Table -->
-        <div class="table-container">
-          <table id="studentTable" class="modern-table">
-            <thead>
-              <tr>
-                <th><input type="checkbox" id="selectAll"></th>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Program</th>
-                <th>Enrollment Chance</th>
-                <th>Status</th>
-                <th>Registration Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for student in students %}
-              <tr>
-                <td><input type="checkbox" class="row-select"></td>
-                <td>{{ student.student_id }}</td>
-                <td>{{ student.name }}</td>
-                <td><span class="program-badge bscs">{{ student.program_first_choice }}</span></td>
-                <td><span class="chance-badge high">{{ student.enrollment_chance }}</span></td>
-                <td><span class="status-badge approved">{{ student. }}</span></td>
-                <td>Sept 5, 2025</td>
-                <td class="action-buttons">
-                  <button class="btn-icon view"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon edit"><i class="fas fa-edit"></i></button>
-                  <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="9">No student records found.</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-
-          <div id="noResults" class="no-results" style="display:none;">
-            <i class="fas fa-search"></i>
-            <p>No results found for your search criteria.</p>
-          </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="pagination">
-          {% if students.has_previous %}
-            <a class="btn secondary" href="?page={{ students.previous_page_number }}">
-              <i class="fas fa-chevron-left"></i> Previous
-            </a>
-          {% else %}
-            <span class="btn secondary" disabled>
-              <i class="fas fa-chevron-left"></i> Previous
-            </span>
-          {% endif %}
-          <span class="page-info">Page {{ students.number }} of {{ students.paginator.num_pages }}</span>
-          {% if students.has_next %}
-            <a class="btn secondary" href="?page={{ students.next_page_number }}">
-              Next <i class="fas fa-chevron-right"></i>
-            </a>
-          {% else %}
-            <span class="btn secondary" disabled>
-              Next <i class="fas fa-chevron-right"></i>
-            </span>
-          {% endif %}
-        </div>
-      </section>
-    </div>
-
-    <!-- ✅ Reports Section -->
-    <div id="reports" class="section-content">
-      <section class="reports-grid">
-        <div class="report-card">
-          <div class="report-icon"><i class="fas fa-chart-bar"></i></div>
-          <div class="report-content">
-            <h3>Admission Analytics Report</h3>
-            <p>Comprehensive analysis of admission trends, success rates, and demographic data.</p>
-            <div class="report-actions">
-              <button class="btn primary">Generate Report</button>
-              <button class="btn secondary">Schedule</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="report-card">
-          <div class="report-icon"><i class="fas fa-users"></i></div>
-          <div class="report-content">
-            <h3>Student Demographics</h3>
-            <p>Detailed breakdown of student population by program, location, and other factors.</p>
-            <div class="report-actions">
-              <button class="btn primary">Generate Report</button>
-              <button class="btn secondary">Schedule</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="report-card">
-          <div class="report-icon"><i class="fas fa-graduation-cap"></i></div>
-          <div class="report-content">
-            <h3>Program Performance</h3>
-            <p>Analysis of program popularity, capacity utilization, and success metrics.</p>
-            <div class="report-actions">
-              <button class="btn primary">Generate Report</button>
-              <button class="btn secondary">Schedule</button>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  </main>
-</div>
-
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-<script src="{% static 'script/admin-dashboard.js' %}"></script>
-</body>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="{% static 'script/admin-dashboard.js' %}"></script>
+  </body>
 </html>
