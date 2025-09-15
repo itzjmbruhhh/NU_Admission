@@ -18,15 +18,22 @@ def loginAdmin(request):
     return render(request, 'login.html')
 
 def adminDash(request):
+    # --- Male/Female enrolled counts and percentages ---
+    enrolled_students = Student.objects.exclude(student_id__isnull=True).exclude(student_id__exact='')
+    male_enrolled_count = enrolled_students.filter(gender__iexact='Male').count()
+    female_enrolled_count = enrolled_students.filter(gender__iexact='Female').count()
+    total_enrolled = male_enrolled_count + female_enrolled_count
+    if total_enrolled > 0:
+        male_enrolled_percent = (male_enrolled_count / total_enrolled) * 100
+        female_enrolled_percent = (female_enrolled_count / total_enrolled) * 100
+    else:
+        male_enrolled_percent = 0
+        female_enrolled_percent = 0
+    from datetime import date
     student_id = request.GET.get('student_id')
-    # Get unique values for dropdowns
     programs = Student.objects.values_list('program_first_choice', flat=True).distinct()
     school_years = Student.objects.values_list('school_year', flat=True).distinct()
-
-    # Status options for filter dropdown
     statuses = ['Enrolled', 'Not Enrolled']
-
-    # Get filter values from GET request
     program = request.GET.get('program')
     school_year = request.GET.get('school_year')
     status = request.GET.get('status')
@@ -43,10 +50,56 @@ def adminDash(request):
     if student_id:
         students = students.filter(student_id__icontains=student_id)
 
-    # Pagination (optional)
+    # Pagination
     paginator = Paginator(students, 10)
     page_number = request.GET.get('page')
     students_page = paginator.get_page(page_number)
+
+    # --- Dashboard summary logic ---
+    # Get current year/term (assume latest school_year and school_term in DB)
+    latest_student = Student.objects.order_by('-school_year', '-school_term').first()
+    current_year = latest_student.school_year if latest_student else None
+    current_term = latest_student.school_term if latest_student else None
+
+    # Get enrolled counts per school year for current term
+    enrolled_qs = Student.objects.filter(
+        school_term=current_term
+    ).exclude(student_id__isnull=True).exclude(student_id__exact='')
+    # Get counts per year, sorted
+    from collections import OrderedDict
+    enrolled_counts = {}
+    for y in school_years:
+        count = enrolled_qs.filter(school_year=y).count()
+        enrolled_counts[str(y)] = count
+    # Sort by year
+    enrolled_counts = OrderedDict(sorted(enrolled_counts.items(), key=lambda x: x[0]))
+    # Get current and previous year counts
+    current_enrolled_count = enrolled_counts.get(str(current_year), 0)
+    years_sorted = list(enrolled_counts.keys())
+    if len(years_sorted) > 1:
+        idx = years_sorted.index(str(current_year))
+        if idx > 0:
+            last_year = years_sorted[idx-1]
+            last_enrolled_count = enrolled_counts[last_year]
+            if last_enrolled_count:
+                percent_change = ((current_enrolled_count - last_enrolled_count) / last_enrolled_count) * 100
+            else:
+                percent_change = 0
+        else:
+            percent_change = 0
+    else:
+        percent_change = 0
+
+    # --- Top Program among enrolled students ---
+    from django.db.models import Count
+    top_program_data = (
+        enrolled_students.values('program_first_choice')
+        .annotate(count=Count('program_first_choice'))
+        .order_by('-count')
+        .first()
+    )
+    top_program = top_program_data['program_first_choice'] if top_program_data else None
+    top_program_count = top_program_data['count'] if top_program_data else 0
 
     context = {
         'students': students_page,
@@ -56,6 +109,16 @@ def adminDash(request):
         'selected_program': program,
         'selected_status': status,
         'selected_school_year': school_year,
+        'current_enrolled_count': current_enrolled_count,
+        'current_year': current_year,
+        'current_term': current_term,
+        'percent_change': percent_change,
+        'male_enrolled_count': male_enrolled_count,
+        'female_enrolled_count': female_enrolled_count,
+        'male_enrolled_percent': male_enrolled_percent,
+        'female_enrolled_percent': female_enrolled_percent,
+        'top_program': top_program,
+        'top_program_count': top_program_count,
     }
     return render(request, 'admin.html', context)
 
