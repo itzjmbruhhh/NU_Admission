@@ -54,39 +54,42 @@
             <div class="summary-card primary">
               <div class="card-icon"><i class="fas fa-users"></i></div>
               <div class="card-content">
-                <h2>450</h2>
-                <p>Total Students</p>
-                <span class="trend up"
-                  ><i class="fas fa-arrow-up"></i> 12% from last month</span
-                >
+                <h2>{{ current_enrolled_count }}</h2>
+                <p>Enrolled Students ({{ current_year }})</p>
+                <span class="trend {% if percent_change >= 0 %}up{% else %}down{% endif %}"
+                  ><i class="fas fa-arrow-{% if percent_change >= 0 %}up{% else %}down{% endif %}"></i> {{ percent_change|floatformat:1 }}% from last year</span>
               </div>
             </div>
             <div class="summary-card success">
               <div class="card-icon"><i class="fas fa-male"></i></div>
               <div class="card-content">
-                <h2>220</h2>
+                <h2>{{ male_enrolled_count }}</h2>
                 <p>Male Students</p>
-                <span class="trend neutral">49% of total</span>
+                <span class="trend neutral">{{ male_enrolled_percent|floatformat:1 }}% of total</span>
               </div>
             </div>
+
             <div class="summary-card warning">
               <div class="card-icon"><i class="fas fa-female"></i></div>
               <div class="card-content">
-                <h2>230</h2>
+                <h2>{{ female_enrolled_count }}</h2>
                 <p>Female Students</p>
-                <span class="trend neutral">51% of total</span>
+                <span class="trend neutral">{{ female_enrolled_percent|floatformat:1 }}% of total</span>
               </div>
             </div>
+
             <div class="summary-card info">
               <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
               <div class="card-content">
-                <h2>BSCS</h2>
+                <h2>{{ top_program|default:'N/A' }}</h2>
                 <p>Top Program</p>
-                <span class="trend up"
-                  ><i class="fas fa-star"></i> Most popular</span
-                >
+                <span class="trend up">
+                  <i class="fas fa-star"></i> Most popular
+                  {% if top_program_count %}<br><small>({{ top_program_count }} enrolled)</small>{% endif %}
+                </span>
               </div>
             </div>
+
           </section>
 
           <!-- Charts Grid -->
