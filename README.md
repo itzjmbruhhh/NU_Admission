@@ -53,7 +53,18 @@ python manage.py runserver
 ```
 
 - Open your browser at `http://127.0.0.1:8000/` for the homepage.
-- Admin panel available at `http://127.0.0.1:8000/admin/`.
+
+Django URL Patterns
+-------------------
+
+URL Path                  | View Function      | Template / Notes
+--------------------------|------------------|-----------------------------
+''                        | index             | templates/index.html
+'register/'               | register          | templates/registration.html
+'loginAdmin/'             | loginAdmin        | templates/login.html
+'adminDash/'              | adminDash         | templates/admin.html / dashboard
+'student/<int:pk>/'      | student_detail    | templates/student_detail.html
+'super_admin/'            | admin.site.urls   | Django Admin Panel
 
 ---
 
