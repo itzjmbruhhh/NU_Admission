@@ -3,6 +3,8 @@ from django.shortcuts import render, redirect
 from .models import Student
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
+from django.core.paginator import Paginator
+from .models  import Student
 
 
 def index(request):
@@ -11,8 +13,12 @@ def index(request):
 def loginAdmin(request):
     return render(request, 'login.html')
 
-def adminLanding(request):
-    return render(request, 'admin.html')
+def adminDash(request):
+    student_list = Student.objects.all()
+    paginator = Paginator(student_list, 10)  # Show 10 students per page
+    page_number = request.GET.get('page')
+    students = paginator.get_page(page_number)
+    return render(request, 'admin.html', {'students': students})
 
 def register(request):
     return render(request, 'registration.html')
