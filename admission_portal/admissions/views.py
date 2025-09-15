@@ -1,3 +1,7 @@
+from django.shortcuts import get_object_or_404
+def student_detail(request, pk):
+    student = get_object_or_404(Student, pk=pk)
+    return render(request, 'student_detail.html', {'student': student})
 # admissions/views.py
 from django.shortcuts import render, redirect
 from .models import Student
@@ -14,6 +18,7 @@ def loginAdmin(request):
     return render(request, 'login.html')
 
 def adminDash(request):
+    student_id = request.GET.get('student_id')
     # Get unique values for dropdowns
     programs = Student.objects.values_list('program_first_choice', flat=True).distinct()
     school_years = Student.objects.values_list('school_year', flat=True).distinct()
@@ -35,6 +40,8 @@ def adminDash(request):
         students = students.exclude(student_id__isnull=True).exclude(student_id__exact='')
     elif status == 'Not Enrolled':
         students = students.filter(student_id__isnull=True) | students.filter(student_id__exact='')
+    if student_id:
+        students = students.filter(student_id__icontains=student_id)
 
     # Pagination (optional)
     paginator = Paginator(students, 10)

@@ -1,6 +1,9 @@
 from django.db import models
 
 class Student(models.Model):
+    @property
+    def get_fields(self):
+        return {field.name: getattr(self, field.name) for field in self._meta.fields}
     school_year = models.CharField(max_length=10, blank=True, null=True)
     school_term = models.CharField(max_length=10, blank=True, null=True)
     campus_code = models.CharField(max_length=10, blank=True, null=True)
