@@ -44,7 +44,7 @@ def adminDash(request):
     school_year = request.GET.get('school_year')
     status = request.GET.get('status')
 
-    students = Student.objects.all()
+    students = Student.objects.all().order_by('-school_year', '-school_term')
     if program:
         students = students.filter(program_first_choice=program)
     if school_year:
