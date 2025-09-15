@@ -1,3 +1,13 @@
+if (
+  window.location.pathname.includes("adminDash") ||
+  window.location.search.match(/(program=|status=|school_year=|page=)/)
+) {
+  showSection("search");
+}
+// Activate Student Records tab if filter or pagination is present
+if (window.location.search.match(/(program=|status=|school_year=|page=)/)) {
+  showSection("search");
+}
 document.addEventListener("DOMContentLoaded", function () {
   // ==========================
   // Section Tab Activation on Page Load (pagination support)

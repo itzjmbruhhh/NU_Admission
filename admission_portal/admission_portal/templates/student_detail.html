@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Student Details</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'css/admin_chart.css' %}" />
+    <style>
+      .student-detail-page {
+        background: #f4f6fb;
+        min-height: 100vh;
+      }
+      .student-detail-header {
+        background: #1e40af;
+        color: #fff;
+        padding: 32px 0 24px 0;
+        text-align: center;
+        border-radius: 0 0 24px 24px;
+        margin-bottom: 32px;
+      }
+      .student-detail-header h1 {
+        font-size: 2.2rem;
+        margin-bottom: 8px;
+      }
+      .student-detail-header p {
+        font-size: 1.1rem;
+        opacity: 0.85;
+      }
+      .student-detail-card {
+        max-width: 700px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(30, 64, 175, 0.08);
+        padding: 32px 40px;
+      }
+      .student-detail-card h2 {
+        margin-bottom: 24px;
+        font-size: 1.5rem;
+        color: #1e40af;
+      }
+      .student-detail-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 24px;
+      }
+      .student-detail-table th,
+      .student-detail-table td {
+        text-align: left;
+        padding: 10px 14px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 1rem;
+      }
+      .student-detail-table th {
+        background: #f7f7f7;
+        width: 200px;
+        color: #1e40af;
+        font-weight: 600;
+      }
+      .student-detail-actions {
+        text-align: right;
+      }
+      .btn {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 8px 20px;
+        background: #1e40af;
+        color: #fff;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: background 0.2s;
+      }
+      .btn:hover {
+        background: #0f256e;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="student-detail-page">
+      <div class="student-detail-header">
+        <h1>Smart Admission System</h1>
+        <p>Student Full Details</p>
+      </div>
+      <div class="student-detail-card">
+        <h2>{{ student.name|default:student.student_id }}</h2>
+        <table class="student-detail-table">
+          {% for field, value in student.get_fields.items %}
+          <tr>
+            <th>{{ field|capfirst }}</th>
+            <td>{{ value }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        <div class="student-detail-actions">
+          <a href="/adminDash" class="btn"
+            ><i class="fas fa-arrow-left"></i> Back to Dashboard</a
+          >
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
