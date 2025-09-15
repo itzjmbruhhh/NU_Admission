@@ -18,6 +18,12 @@ def loginAdmin(request):
     return render(request, 'login.html')
 
 def adminDash(request):
+    # Admission success rate (enrolled vs not enrolled)
+    admission_labels = ["Enrolled", "Not Enrolled"]
+    admission_data = [
+        Student.objects.exclude(student_id__isnull=True).exclude(student_id__exact='').count(),
+        Student.objects.filter(student_id__isnull=True).count() + Student.objects.filter(student_id__exact='').count()
+    ]
     # --- Male/Female enrolled counts and percentages ---
     enrolled_students = Student.objects.exclude(student_id__isnull=True).exclude(student_id__exact='')
     male_enrolled_count = enrolled_students.filter(gender__iexact='Male').count()
@@ -105,6 +111,15 @@ def adminDash(request):
     academic_year_labels = list(enrolled_counts.keys())
     academic_year_data = list(enrolled_counts.values())
 
+    # Program popularity for pie chart
+    program_popularity = (
+        enrolled_students.values('program_first_choice')
+        .annotate(count=Count('program_first_choice'))
+        .order_by('-count')
+    )
+    program_labels = [p['program_first_choice'] for p in program_popularity]
+    program_data = [p['count'] for p in program_popularity]
+
     context = {
         'students': students_page,
         'programs': programs,
@@ -125,6 +140,10 @@ def adminDash(request):
         'top_program_count': top_program_count,
         'academic_year_labels': academic_year_labels,
         'academic_year_data': academic_year_data,
+        'program_labels': program_labels,
+        'program_data': program_data,
+        'admission_labels': admission_labels,
+        'admission_data': admission_data,
     }
     return render(request, 'admin.html', context)
 

@@ -39,11 +39,11 @@
       <main class="dashboard-container">
         <!-- Section Navigation -->
         <section class="section-tabs">
-          <button class="tab-btn active" onclick="showSection('overview')">
-            <i class="fas fa-chart-line"></i> Overview & Analytics
-          </button>
           <button class="tab-btn" onclick="showSection('search')">
             <i class="fas fa-search"></i> Student Records
+          </button>
+          <button class="tab-btn active" onclick="showSection('overview')">
+            <i class="fas fa-chart-line"></i> Overview & Analytics
           </button>
         </section>
 
@@ -94,19 +94,6 @@
 
           <!-- Charts Grid -->
           <section class="charts-grid">
-            <!-- Enrollment Trends -->
-            <div class="chart-container large">
-              <div class="chart-header">
-                <h3><i class="fas fa-chart-area"></i> Enrollment Trends</h3>
-                <div class="chart-controls">
-                  <select id="trendPeriod">
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
-                </div>
-              </div>
-              <canvas id="enrollmentTrendChart"></canvas>
-            </div>
 
             <!-- Academic Year Distribution -->
             <div class="chart-container medium">
@@ -128,6 +115,8 @@
               </div>
               <canvas id="programChart"></canvas>
             </div>
+            {{ program_labels|json_script:"program-labels" }}
+            {{ program_data|json_script:"program-data" }}
 
             <!-- Admission Success Rate -->
             <div class="chart-container medium">
@@ -138,6 +127,8 @@
               </div>
               <canvas id="admissionChart"></canvas>
             </div>
+            {{ admission_labels|json_script:"admission-labels" }}
+            {{ admission_data|json_script:"admission-data" }}
           </section>
         </div>
 
