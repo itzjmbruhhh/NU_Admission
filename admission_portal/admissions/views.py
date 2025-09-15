@@ -14,11 +14,43 @@ def loginAdmin(request):
     return render(request, 'login.html')
 
 def adminDash(request):
-    student_list = Student.objects.all()
-    paginator = Paginator(student_list, 10)  # Show 10 students per page
+    # Get unique values for dropdowns
+    programs = Student.objects.values_list('program_first_choice', flat=True).distinct()
+    school_years = Student.objects.values_list('school_year', flat=True).distinct()
+
+    # Status options for filter dropdown
+    statuses = ['Enrolled', 'Not Enrolled']
+
+    # Get filter values from GET request
+    program = request.GET.get('program')
+    school_year = request.GET.get('school_year')
+    status = request.GET.get('status')
+
+    students = Student.objects.all()
+    if program:
+        students = students.filter(program_first_choice=program)
+    if school_year:
+        students = students.filter(school_year=school_year)
+    if status == 'Enrolled':
+        students = students.exclude(student_id__isnull=True).exclude(student_id__exact='')
+    elif status == 'Not Enrolled':
+        students = students.filter(student_id__isnull=True) | students.filter(student_id__exact='')
+
+    # Pagination (optional)
+    paginator = Paginator(students, 10)
     page_number = request.GET.get('page')
-    students = paginator.get_page(page_number)
-    return render(request, 'admin.html', {'students': students})
+    students_page = paginator.get_page(page_number)
+
+    context = {
+        'students': students_page,
+        'programs': programs,
+        'statuses': statuses,
+        'school_years': school_years,
+        'selected_program': program,
+        'selected_status': status,
+        'selected_school_year': school_year,
+    }
+    return render(request, 'admin.html', context)
 
 def register(request):
     return render(request, 'registration.html')
