@@ -15,30 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
   if (window.location.search.includes("page=")) {
     showSection("search");
   }
-  // ==========================
-  // Enrollment Trends
-  // ==========================
-  new Chart(document.getElementById("enrollmentTrendChart").getContext("2d"), {
-    type: "line",
-    data: {
-      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
-      datasets: [
-        {
-          label: "Enrollments",
-          data: [30, 45, 60, 40, 70, 90, 100],
-          borderColor: "#1e40af",
-          backgroundColor: "rgba(0, 33, 71, 0.2)",
-          tension: 0.3,
-          fill: true,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true } },
-    },
-  });
 
   // ==========================
   // Academic Year Distribution (actual data)
@@ -92,14 +68,41 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================
   // Program Popularity (Pie Chart)
   // ==========================
-  new Chart(document.getElementById("programChart").getContext("2d"), {
+  // Program Popularity Pie Chart (actual data)
+  let programLabels = JSON.parse(
+    document.getElementById("program-labels").textContent
+  );
+  let programData = JSON.parse(
+    document.getElementById("program-data").textContent
+  );
+  let programColors = [
+    "#1e40af",
+    "#FFD700",
+    "#059669",
+    "#0891b2",
+    "#dc2626",
+    "#e65959",
+    "#6366f1",
+    "#f59e42",
+    "#10b981",
+    "#f43f5e",
+  ];
+  let pieColors = [];
+  for (let i = 0; i < programLabels.length; i++) {
+    pieColors.push(programColors[i % programColors.length]);
+  }
+  // Set chart width larger
+  const programChartCanvas = document.getElementById("programChart");
+  programChartCanvas.width = 600;
+  programChartCanvas.height = 400;
+  new Chart(programChartCanvas.getContext("2d"), {
     type: "pie",
     data: {
-      labels: ["BSCS", "BSIT", "BSCE", "BSBA"],
+      labels: programLabels,
       datasets: [
         {
-          data: [80, 70, 60, 40],
-          backgroundColor: ["#1e40af", "#FFD700", "#059669", "#0891b2"],
+          data: programData,
+          backgroundColor: pieColors,
         },
       ],
     },
@@ -108,7 +111,7 @@ document.addEventListener("DOMContentLoaded", function () {
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: "right", // move legend to the side for clarity
+          position: "bottom",
           labels: {
             font: {
               size: 14,
@@ -122,15 +125,23 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================
   // Admission Success Rate
   // ==========================
+  // Admission Success Rate Chart (actual data)
+  let admissionLabels = JSON.parse(
+    document.getElementById("admission-labels").textContent
+  );
+  let admissionData = JSON.parse(
+    document.getElementById("admission-data").textContent
+  );
+  let admissionColors = ["#059669", "#e65959"];
   new Chart(document.getElementById("admissionChart").getContext("2d"), {
     type: "bar",
     data: {
-      labels: ["Approved", "Pending", "Rejected"],
+      labels: admissionLabels,
       datasets: [
         {
           label: "Applicants",
-          data: [300, 100, 50],
-          backgroundColor: ["#1e40af", "#059669", "#dc2626"],
+          data: admissionData,
+          backgroundColor: admissionColors,
         },
       ],
     },
