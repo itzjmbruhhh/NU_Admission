@@ -181,7 +181,6 @@
                 <th>Student ID</th>
                 <th>Name</th>
                 <th>Program</th>
-                <th>Year Level</th>
                 <th>Enrollment Chance</th>
                 <th>Status</th>
                 <th>Registration Date</th>
@@ -189,15 +188,14 @@
               </tr>
             </thead>
             <tbody>
-              <!-- sample rows -->
+              {% for student in students %}
               <tr>
                 <td><input type="checkbox" class="row-select"></td>
-                <td>2024-001</td>
-                <td>Dale Montano</td>
-                <td><span class="program-badge bscs">BSCS</span></td>
-                <td>1st Year</td>
-                <td><span class="chance-badge high">75%</span></td>
-                <td><span class="status-badge approved">Approved</span></td>
+                <td>{{ student.student_id }}</td>
+                <td>{{ student.name }}</td>
+                <td><span class="program-badge bscs">{{ student.program_first_choice }}</span></td>
+                <td><span class="chance-badge high">{{ student.enrollment_chance }}</span></td>
+                <td><span class="status-badge approved">{{ student. }}</span></td>
                 <td>Sept 5, 2025</td>
                 <td class="action-buttons">
                   <button class="btn-icon view"><i class="fas fa-eye"></i></button>
@@ -205,6 +203,11 @@
                   <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
                 </td>
               </tr>
+              {% empty %}
+              <tr>
+                <td colspan="9">No student records found.</td>
+              </tr>
+              {% endfor %}
             </tbody>
           </table>
 
@@ -216,9 +219,25 @@
 
         <!-- Pagination -->
         <div class="pagination">
-          <button class="btn secondary" id="prevPage"><i class="fas fa-chevron-left"></i> Previous</button>
-          <span class="page-info">Page 1 of 5</span>
-          <button class="btn secondary" id="nextPage">Next <i class="fas fa-chevron-right"></i></button>
+          {% if students.has_previous %}
+            <a class="btn secondary" href="?page={{ students.previous_page_number }}">
+              <i class="fas fa-chevron-left"></i> Previous
+            </a>
+          {% else %}
+            <span class="btn secondary" disabled>
+              <i class="fas fa-chevron-left"></i> Previous
+            </span>
+          {% endif %}
+          <span class="page-info">Page {{ students.number }} of {{ students.paginator.num_pages }}</span>
+          {% if students.has_next %}
+            <a class="btn secondary" href="?page={{ students.next_page_number }}">
+              Next <i class="fas fa-chevron-right"></i>
+            </a>
+          {% else %}
+            <span class="btn secondary" disabled>
+              Next <i class="fas fa-chevron-right"></i>
+            </span>
+          {% endif %}
         </div>
       </section>
     </div>
