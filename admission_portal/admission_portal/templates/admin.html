@@ -145,34 +145,45 @@
               <h3><i class="fas fa-search"></i> Advanced Student Search</h3>
             </div>
             <div class="search-filters">
-              <div class="filter-row">
-                <div class="filter-group">
-                  <label>Search by Name/ID</label>
-                  <input
-                    type="text"
-                    id="nameSearch"
-                    placeholder="Enter student name or ID"
-                  />
+              <form method="get" class="filter-form">
+                <div class="filter-row">
+                  <div class="filter-group">
+                    <label>Program</label>
+                    <select name="program">
+                      <option value="">All Programs</option>
+                      {% for p in programs %}
+                        <option value="{{ p }}" {% if p == selected_program %}selected{% endif %}>{{ p }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label>Status</label>
+                    <select name="status">
+                      <option value="">All Statuses</option>
+                      {% for s in statuses %}
+                        <option value="{{ s }}" {% if s == selected_status %}selected{% endif %}>{{ s }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label>School Year</label>
+                    <select name="school_year">
+                      <option value="">All Years</option>
+                      {% for y in school_years %}
+                        <option value="{{ y }}" {% if y == selected_school_year %}selected{% endif %}>{{ y }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="filter-actions">
+                    <button type="submit" class="btn primary">
+                      <i class="fas fa-search"></i> Filter
+                    </button>
+                    <a href="/adminDash" class="btn secondary">
+                      <i class="fas fa-refresh"></i> Reset
+                    </a>
+                  </div>
                 </div>
-                <div class="filter-group">
-                  <label>Program</label>
-                  <select id="programFilter">
-                    <option value="">All Programs</option>
-                    <option value="BSCS">BSCS</option>
-                    <option value="BSIT">BSIT</option>
-                    <option value="BSCE">BSCE</option>
-                    <option value="BSBA">BSBA</option>
-                  </select>
-                </div>
-              </div>
-              <div class="filter-actions">
-                <button id="searchBtn" class="btn primary">
-                  <i class="fas fa-search"></i> Search
-                </button>
-                <button id="resetBtn" class="btn secondary">
-                  <i class="fas fa-refresh"></i> Reset
-                </button>
-              </div>
+              </form>
             </div>
           </section>
 
@@ -221,18 +232,10 @@
                       >
                     </td>
                     <td>
-                      {% if student.student_id %}
-                      <span
-                        class="status-badge enrolled"
-                        style="background: #059669; color: #fff"
-                        >Enrolled</span
-                      >
+                      {% if student.status == 'Enrolled' %}
+                        <span class="status-badge enrolled" style="background: #059669; color: #fff">Enrolled</span>
                       {% else %}
-                      <span
-                        class="status-badge not-enrolled"
-                        style="background: #c73838; color: #fff"
-                        >Not Enrolled</span
-                      >
+                        <span class="status-badge not-enrolled" style="background: #e65959; color: #fff">Not Enrolled</span>
                       {% endif %}
                     </td>
                     <td>{{ student.school_year }}</td>

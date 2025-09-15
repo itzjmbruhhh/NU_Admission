@@ -37,6 +37,11 @@ class Student(models.Model):
     complete_permanent_address = models.TextField(blank=True, null=True)
 
     student_id = models.CharField(max_length=20, unique=False, blank=True, null=True)
+    
+    @property
+    def status(self):
+        return "Enrolled" if self.student_id else "Not Enrolled"
+    
     disability = models.CharField(max_length=100, blank=True, null=True)
     indigenous = models.CharField(max_length=100, blank=True, null=True)
     birth_country = models.CharField(max_length=100, blank=True, null=True)
