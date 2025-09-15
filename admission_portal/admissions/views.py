@@ -101,6 +101,10 @@ def adminDash(request):
     top_program = top_program_data['program_first_choice'] if top_program_data else None
     top_program_count = top_program_data['count'] if top_program_data else 0
 
+    # Academic year distribution for enrolled students
+    academic_year_labels = list(enrolled_counts.keys())
+    academic_year_data = list(enrolled_counts.values())
+
     context = {
         'students': students_page,
         'programs': programs,
@@ -119,6 +123,8 @@ def adminDash(request):
         'female_enrolled_percent': female_enrolled_percent,
         'top_program': top_program,
         'top_program_count': top_program_count,
+        'academic_year_labels': academic_year_labels,
+        'academic_year_data': academic_year_data,
     }
     return render(request, 'admin.html', context)
 
