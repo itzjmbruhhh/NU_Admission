@@ -2,26 +2,6 @@
 
 A Django-based student admission system for NU Lipa, allowing student registration, admin management, and future ML integration for processing applications.
 
-[GitHub Repository](https://github.com/itzjmbruhhh/NU_Admission)
-
----
-
-## **Project Structure**
-
-```
-NU_Admission/
-│
-├─ dmission_portal/          # Root folder
-│   ├─ manage.py
-│   ├─ requirements.txt
-│   ├─ admissions/           # Django app for student admission
-│   ├─ templates/
-│   ├─ static/
-│   └─ ... other Django files
-│
-└─ README.md
-```
-
 ---
 
 ## **Setup Instructions**
