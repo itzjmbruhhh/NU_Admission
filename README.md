@@ -92,4 +92,4 @@ URL Path                  | View Function      | Template / Notes
 - Static files are served via `{% static %}` in templates. Make sure `STATICFILES_DIRS` and `STATIC_URL` are configured in `settings.py`.
 - To reset the database, you can delete `db.sqlite3` and re-run migrations.
 - For production deployment, configure `ALLOWED_HOSTS`, database settings, and static files properly.
--titi
+-try ulit
