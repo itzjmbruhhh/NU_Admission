@@ -139,10 +139,19 @@
                             <label for="birthDate">Birth Date *</label>
                             <input type="date" id="birthDate" name="birthDate" required>
                         </div>
+
+                        <div class="form-group">
+                            <label for="province">Birth Place *</label>
+                            <select id="province" name="province" required>
+                                <option value="">Select Province</option>
+                            </select>
+                        </div>
                         
                         <div class="form-group">
-                            <label for="birthPlace">Birth Place *</label>
-                            <input type="text" id="birthPlace" name="birthPlace" required>
+                            <label for="city">Birth City/Municipality *</label>
+                            <select id="city" name="city" required>
+                                <option value="">Select City</option>
+                            </select>
                         </div>
                         
                         <div class="form-group">
@@ -153,6 +162,20 @@
                         <div class="form-group">
                             <label for="religion">Religion *</label>
                             <input type="text" id="religion" name="religion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="indigenous">Indigenous *</label>
+                            <select id="indigenous" name="indigenous"  required>
+                                <option value="">Select Indigency</option>
+                                <option value="aeta">Aeta</option>
+                                <option value="igorot">Igorot</option>
+                                <option value="mangyan">Mangyan</option>
+                                <option value="waray">Waray</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="disability">Disability *</label>
+                            <input type="text" id="disability" name="disability" required>
                         </div>
                     </div>
                 </div>
@@ -167,8 +190,17 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="cityProvince">City/Province *</label>
-                            <input type="text" id="cityProvince" name="cityProvince" required>
+                            <label for="province">Province *</label>
+                            <select id="province" name="province" required>
+                                <option value="">Select Province</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city">City/Municipality *</label>
+                            <select id="city" name="city" required>
+                                <option value="">Select City</option>
+                            </select>
                         </div>
                         
                         <div class="form-group">
@@ -184,6 +216,29 @@
                         <div class="form-group">
                             <label for="emailAddress">Email Address *</label>
                             <input type="email" id="emailAddress" name="emailAddress" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="permanentAddress">Permanent Address *</label>
+                            <input type="text" id="permanentAddress" name="permanentAddress" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="province">Province *</label>
+                            <select id="province" name="province" required>
+                                <option value="">Select Province</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city">City/Municipality *</label>
+                            <select id="city" name="city" required>
+                                <option value="">Select City</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="zipCode">Zip Code *</label>
+                            <input type="text" id="zipCode" name="zipCode" required>
                         </div>
                     </div>
                 </div>
@@ -215,6 +270,10 @@
                         <div class="form-group full-width">
                             <label for="guardianContact">Guardian's Contact Information *</label>
                             <input type="text" id="guardianContact" name="guardianContact" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="annualIncome">Annual Income *</label>
+                            <input type="text" id="annualIncome" name="annualIncome" placeholder="(e.g., 50,000 or 100,000)" required>
                         </div>
                     </div>
                 </div>
@@ -307,6 +366,43 @@
                 this.classList.remove('error');
             });
         });
+
+        // Dynamic Province and City Selection
+        document.addEventListener("DOMContentLoaded", function () {
+    const provinceSelect = document.getElementById("province");
+    const citySelect = document.getElementById("city");
+
+    // Load provinces
+    fetch("https://psgc.cloud/api/provinces")
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(province => {
+                const option = document.createElement("option");
+                option.value = province.code;
+                option.textContent = province.name;
+                provinceSelect.appendChild(option);
+            });
+        });
+
+    // Load cities when province is selected
+    provinceSelect.addEventListener("change", function () {
+        const provinceCode = this.value;
+        citySelect.innerHTML = '<option value="">Select City</option>'; // reset
+
+        if (!provinceCode) return;
+
+        fetch(`https://psgc.cloud/api/provinces/${provinceCode}/cities-municipalities`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(city => {
+                    const option = document.createElement("option");
+                    option.value = city.code;
+                    option.textContent = city.name;
+                    citySelect.appendChild(option);
+                });
+            });
+    });
+});
     </script>
 </body>
 </html>
