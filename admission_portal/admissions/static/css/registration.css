@@ -330,3 +330,8 @@ input.error, select.error {
         padding: 1rem;
     }
 }
+
+select {
+  max-height: 200px;   /* Limit the dropdown box height */
+  overflow-y: auto;    /* Scroll if too long */
+}
