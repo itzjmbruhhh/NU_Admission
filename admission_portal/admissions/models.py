@@ -60,8 +60,10 @@ class Student(models.Model):
     last_school_attended = models.CharField(max_length=255, blank=True, null=True)
     school_type = models.CharField(max_length=50, blank=True, null=True)
 
+
     # Additional Fields
-    enrollment_chance = models.FloatField(blank=True, null=True)     # For ML model prediction
+    annual_income = models.CharField(max_length=50, blank=True, null=True)
+    enrollment_chance = models.FloatField(blank=True, null=True)
     
     @property
     def status(self):

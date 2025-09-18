@@ -44,7 +44,8 @@ def adminDash(request):
     school_year = request.GET.get('school_year')
     status = request.GET.get('status')
 
-    students = Student.objects.all().order_by('-school_year', '-school_term')
+    # Order by latest registration (most recent first)
+    students = Student.objects.all().order_by('-id')
     if program:
         students = students.filter(program_first_choice=program)
     if school_year:
@@ -147,8 +148,6 @@ def adminDash(request):
     }
     return render(request, 'admin.html', context)
 
-def register(request):
-    return render(request, 'registration.html')
 
 def register_student(request):
     if request.method == "POST":
@@ -158,11 +157,22 @@ def register_student(request):
 
         form = request.POST
         # --- Feature extraction ---
+        from datetime import date, datetime
         school_term = form.get("schoolTerm")
-        age_at_enrollment = form.get("ageAtEnrollment") or ""
-        requirement_agreement = form.get("truthfulInfo", "No")
-        disability = form.get("disability", "No")
-        indigenous = form.get("indigenous", "No")
+        # Derive age at enrollment from birthDate if available
+        birth_date_raw = form.get("birthDate")
+        age_at_enrollment = ""
+        if birth_date_raw:
+            try:
+                bd = datetime.strptime(birth_date_raw, "%Y-%m-%d").date()
+                today = date.today()
+                age = today.year - bd.year - ((today.month, today.day) < (bd.month, bd.day))
+                age_at_enrollment = age
+            except Exception:
+                age_at_enrollment = ""
+        requirement_agreement = "Yes" if form.get("truthfulInfo") else "No"
+        disability = form.get("disability", "").strip()
+        indigenous = form.get("indigenous", "").strip()
         program_first_choice = form.get("firstChoice", "")
         program_second_choice = form.get("secondChoice", "")
         entry_level = form.get("entryLevel", "")
@@ -172,12 +182,12 @@ def register_student(request):
         citizen_of = form.get("nationality", "")
         religion = form.get("religion", "")
         civil_status = form.get("civilStatus", "")
-        current_region = form.get("presentRegion", "")
+        current_region = form.get("currentRegion", "") or ""
         current_province = form.get("presentProvince", "")
         current_city = form.get("presentCity", "")
         current_brgy = form.get("presentBarangay", "")
         permanent_country = form.get("permanentCountry", "")
-        permanent_region = form.get("permanentRegion", "")
+        permanent_region = form.get("permanentRegion", "") or ""
         permanent_province = form.get("permanentProvince", "")
         permanent_city = form.get("permanentCity", "")
         permanent_brgy = form.get("permanentBarangay", "")
@@ -186,17 +196,19 @@ def register_student(request):
         school_type = form.get("schoolType", "")
 
         def bin_convert(val):
-            return 1 if str(val).strip().lower() == "yes" else 0
+            v = str(val).strip().lower()
+            if v in {"yes","y","1","true","t"}: return 1
+            return 0
         requirement_agreement_bin = bin_convert(requirement_agreement)
-        disability_bin = bin_convert(disability)
-        indigenous_bin = bin_convert(indigenous)
+        disability_bin = 0 if disability == "" else 1  # treat presence of any text as 1
+        indigenous_bin = 0 if indigenous == "" else 1  # treat selection of any group as 1
 
         def cap(val):
             return str(val).strip().upper()
         cat_fields = [program_first_choice, program_second_choice, entry_level, birth_city, birth_province, gender,
-                     citizen_of, religion, civil_status, current_region, current_province, current_city, current_brgy,
-                     permanent_country, permanent_region, permanent_province, permanent_city, permanent_brgy,
-                     birth_country, student_type, school_type]
+                      citizen_of, religion, civil_status, current_region, current_province, current_city, current_brgy,
+                      permanent_country, permanent_region, permanent_province, permanent_city, permanent_brgy,
+                      birth_country, student_type, school_type]
         cat_fields_cap = [cap(f) for f in cat_fields]
 
         feature_names = [
@@ -233,7 +245,8 @@ def register_student(request):
             gender=gender,
             civil_status=civil_status,
             birth_date=form.get("birthDate"),
-            birth_place=form.get("birthPlace"),
+            # Form doesn't have distinct birthPlace text input; use province label as birth_place
+            birth_place=birth_province,
             birth_city=birth_city,
             birth_province=birth_province,
             birth_country=birth_country,
@@ -259,6 +272,7 @@ def register_student(request):
             requirement_agreement=requirement_agreement_bin,
             disability=disability_bin,
             indigenous=indigenous_bin,
+            annual_income=form.get("annualIncome"),
             enrollment_chance=pred_prob
         )
         student.save()
