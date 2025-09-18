@@ -171,6 +171,25 @@
                   <option value="Returnee">Returnee</option>
                 </select>
               </div>
+              <div class="form-group">
+                <label for="entryLevel">Entry Level *</label>
+                <select id="entryLevel" name="entryLevel" required>
+                  <option value="">Select Entry Level</option>
+                  <option value="Freshman">Freshman</option>
+                  <option value="Sophomore">Sophomore</option>
+                  <option value="Junior">Junior</option>
+                  <option value="Senior">Senior</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="schoolType">School Type *</label>
+                <select id="schoolType" name="schoolType" required>
+                  <option value="">Select School Type</option>
+                  <option value="Public">Public</option>
+                  <option value="Private">Private</option>
+                  <option value="International">International</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -236,6 +255,16 @@
                 <select id="birthCity" name="birthCity" required>
                   <option value="">Select City</option>
                 </select>
+              </div>
+              <div class="form-group">
+                <label for="birthCountry">Birth Country *</label>
+                <input
+                  type="text"
+                  id="birthCountry"
+                  name="birthCountry"
+                  value="Philippines"
+                  required
+                />
               </div>
 
               <div class="form-group">
@@ -323,6 +352,7 @@
                   <option value="">Select Barangay</option>
                 </select>
               </div>
+              <input type="hidden" id="currentRegion" name="currentRegion" />
               <div class="form-group">
                 <label for="presentZip">Zip Code *</label>
                 <input type="text" id="presentZip" name="presentZip" required />
@@ -367,12 +397,27 @@
                 <label for="permanentBarangay">Barangay *</label>
                 <select
                   id="permanentBarangay"
-                  name="permanent Barangay"
+                  name="permanentBarangay"
                   required
                 >
                   <option value="">Select Barangay</option>
                 </select>
               </div>
+              <div class="form-group">
+                <label for="permanentCountry">Permanent Country *</label>
+                <input
+                  type="text"
+                  id="permanentCountry"
+                  name="permanentCountry"
+                  value="Philippines"
+                  required
+                />
+              </div>
+              <input
+                type="hidden"
+                id="permanentRegion"
+                name="permanentRegion"
+              />
               <div class="form-group">
                 <label for="permanentZip">Zip Code *</label>
                 <input
@@ -499,43 +544,29 @@
     </div>
 
     <script>
-      document
-        .getElementById("registrationForm")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          const requiredFields = document.querySelectorAll("[required]");
-          let emptyFields = [];
-
+      (function () {
+        const formEl = document.getElementById("registrationForm");
+        formEl.addEventListener("submit", function (e) {
+          const requiredFields = formEl.querySelectorAll("[required]");
+          let hasErrors = false;
           requiredFields.forEach((field) => {
             if (!field.value.trim()) {
-              emptyFields.push(
-                field.previousElementSibling.textContent.replace(" *", "")
-              );
+              hasErrors = true;
               field.classList.add("error");
             } else {
               field.classList.remove("error");
             }
           });
-
-          if (emptyFields.length > 0) {
+          if (hasErrors) {
+            e.preventDefault();
             const modal = document.getElementById("errorModal");
             const errorMessage = document.getElementById("errorMessage");
-
-            if (emptyFields.length === 1) {
-              errorMessage.textContent = `Please fill in the ${emptyFields[0]} field.`;
-            } else {
-              errorMessage.textContent = `Please fill in the following required fields: ${emptyFields.join(
-                ", "
-              )}.`;
-            }
-
+            errorMessage.textContent =
+              "Please fill in all required fields before submitting the form.";
             modal.style.display = "block";
-          } else {
-            alert("Application submitted successfully!");
-            // Here you would typically send the data to a server
           }
         });
+      })();
 
       // Close modal functionality
       document.querySelector(".close").addEventListener("click", function () {
@@ -556,29 +587,28 @@
         });
       });
 
-      // Function to load provinces and cities for multiple sections
+      // Function to load provinces and cities for multiple sections (values = human-readable names)
       function loadProvinces(provinceSelectId, citySelectId) {
         const provinceSelect = document.getElementById(provinceSelectId);
         const citySelect = document.getElementById(citySelectId);
 
-        // Load provinces
         fetch("https://psgc.cloud/api/provinces")
           .then((res) => res.json())
           .then((data) => {
             data.forEach((province) => {
               const opt = document.createElement("option");
-              opt.value = province.code;
+              opt.value = province.name; // store readable name
+              opt.dataset.code = province.code; // keep code separately
               opt.textContent = province.name;
               provinceSelect.appendChild(opt);
             });
           });
 
-        // Load cities when province changes
         provinceSelect.addEventListener("change", function () {
-          const provinceCode = this.value;
+          const selected = this.selectedOptions[0];
+          const provinceCode = selected ? selected.dataset.code : null;
           citySelect.innerHTML = '<option value="">Select City</option>';
           if (!provinceCode) return;
-
           fetch(
             `https://psgc.cloud/api/provinces/${provinceCode}/cities-municipalities`
           )
@@ -586,7 +616,8 @@
             .then((data) => {
               data.forEach((city) => {
                 const opt = document.createElement("option");
-                opt.value = city.code;
+                opt.value = city.name;
+                opt.dataset.code = city.code;
                 opt.textContent = city.name;
                 citySelect.appendChild(opt);
               });
@@ -618,7 +649,8 @@
             .then((data) => {
               data.forEach((prov) => {
                 const option = document.createElement("option");
-                option.value = prov.code;
+                option.value = prov.name; // use readable name
+                option.dataset.code = prov.code; // preserve code
                 option.textContent = prov.name;
                 selectEl.appendChild(option);
               });
@@ -637,7 +669,8 @@
             .then((data) => {
               data.forEach((city) => {
                 const option = document.createElement("option");
-                option.value = city.code;
+                option.value = city.name;
+                option.dataset.code = city.code;
                 option.textContent = city.name;
                 citySelect.appendChild(option);
               });
@@ -657,7 +690,8 @@
             .then((data) => {
               data.forEach((brgy) => {
                 const option = document.createElement("option");
-                option.value = brgy.code;
+                option.value = brgy.name; // store name
+                option.dataset.code = brgy.code; // keep code
                 option.textContent = brgy.name;
                 barangaySelect.appendChild(option);
               });
@@ -675,20 +709,24 @@
 
         // when province changes, load its cities
         presentProvince.addEventListener("change", function () {
-          loadCities(this.value, presentCity);
+          const code = this.selectedOptions[0]?.dataset.code;
+          loadCities(code, presentCity);
         });
 
         permanentProvince.addEventListener("change", function () {
-          loadCities(this.value, permanentCity);
+          const code = this.selectedOptions[0]?.dataset.code;
+          loadCities(code, permanentCity);
         });
         // when city changes, load its barangays
         // when city changes, load barangays
         presentCity.addEventListener("change", function () {
-          loadBarangays(this.value, presentBarangay);
+          const code = this.selectedOptions[0]?.dataset.code;
+          loadBarangays(code, presentBarangay);
         });
 
         permanentCity.addEventListener("change", function () {
-          loadBarangays(this.value, permanentBarangay);
+          const code = this.selectedOptions[0]?.dataset.code;
+          loadBarangays(code, permanentBarangay);
         });
 
         // Same-as-Present logic (copies address, province, city, barangay, zip)
@@ -700,26 +738,29 @@
           document.getElementById("permanentZip").value =
             document.getElementById("presentZip").value;
 
-          const presentProvVal = presentProvince.value;
-          const presentCityVal = presentCity.value;
-          const presentBrgyVal =
-            document.getElementById("presentBarangay").value;
+          const presentProvVal = presentProvince.value; // readable province name
+          const presentProvCode =
+            presentProvince.selectedOptions[0]?.dataset.code;
+          const presentCityVal = presentCity.value; // readable city name
+          const presentCityCode = presentCity.selectedOptions[0]?.dataset.code;
+          const presentBrgySelect = document.getElementById("presentBarangay");
+          const presentBrgyVal = presentBrgySelect.value; // readable barangay name
+          const presentBrgyCode =
+            presentBrgySelect.selectedOptions[0]?.dataset.code;
 
           permanentProvince.value = presentProvVal;
 
-          if (presentProvVal) {
-            // load corresponding cities into permanentCity then set value
-            loadCities(presentProvVal, permanentCity).then(() => {
+          if (presentProvCode) {
+            // load corresponding cities into permanentCity using province code then set value
+            loadCities(presentProvCode, permanentCity).then(() => {
               permanentCity.value = presentCityVal || "";
-
-              if (presentCityVal) {
-                // load barangays for this city and then select the same barangay
+              if (presentCityCode) {
                 loadBarangays(
-                  presentCityVal,
+                  presentCityCode,
                   document.getElementById("permanentBarangay")
                 ).then(() => {
-                  document.getElementById("permanentBarangay").value =
-                    presentBrgyVal || "";
+                  const permBrgy = document.getElementById("permanentBarangay");
+                  permBrgy.value = presentBrgyVal || "";
                 });
               }
             });
