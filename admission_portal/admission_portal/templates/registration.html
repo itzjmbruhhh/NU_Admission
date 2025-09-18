@@ -74,7 +74,7 @@
                       Marketing Management
                     </option>
                     <option value="BS Tourism">
-                      Bachelor of Science in Tourism
+                      Bachelor of Science in Tourism Management
                     </option>
                   </optgroup>
                   <optgroup
@@ -266,6 +266,15 @@
                 <label for="disability">Disability *</label>
                 <input type="text" id="disability" name="disability" required />
               </div>
+              <div class="form-group">
+                <label for="emailAddress">Email Address *</label>
+                <input
+                  type="email"
+                  id="emailAddress"
+                  name="emailAddress"
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -275,7 +284,7 @@
             <div class="form-grid">
               <!-- Present Address -->
               <div class="form-group full-width">
-                <label for="presentAddress">Present Address *</label>
+                <label for="presentAddress" style="font-size: 1.2em; font-weight: bold;">Present Address *</label>
                 <input
                   type="text"
                   id="presentAddress"
@@ -296,6 +305,12 @@
                 </select>
               </div>
               <div class="form-group">
+                <label for="presentBarangay">Barangay *</label>
+                <select id="presentBarangay" name="presentBarangay" required>
+                 <option value="">Select Barangay</option>
+                </select>
+              </div>
+              <div class="form-group">
                 <label for="presentZip">Zip Code *</label>
                 <input type="text" id="presentZip" name="presentZip" required />
               </div>
@@ -310,19 +325,9 @@
                   required
                 />
               </div>
-              <div class="form-group">
-                <label for="emailAddress">Email Address *</label>
-                <input
-                  type="email"
-                  id="emailAddress"
-                  name="emailAddress"
-                  required
-                />
-              </div>
-
               <!-- Permanent Address -->
               <div class="form-group full-width">
-                <label for="permanentAddress">
+                <label for="permanentAddress" style="font-size: 1.2em; font-weight: bold;">
                   Permanent Address *
                   <input type="checkbox" id="sameAsPresent" />
                   <small>Same as Present Address</small>
@@ -348,6 +353,12 @@
                 <label for="permanentCity">City/Municipality *</label>
                 <select id="permanentCity" name="permanentCity" required>
                   <option value="">Select City</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="permanentBarangay">Barangay *</label>
+                <select id="permanentBarangay" name="permanent Barangay" required>
+                 <option value="">Select Barangay</option>
                 </select>
               </div>
               <div class="form-group">
@@ -407,15 +418,15 @@
                   required
                 />
               </div>
+
               <div class="form-group">
                 <label for="annualIncome">Annual Income *</label>
-                <input
-                  type="text"
-                  id="annualIncome"
-                  name="annualIncome"
-                  placeholder="(e.g., 50,000 or 100,000)"
-                  required
-                />
+                <select name="annualIncome" id="annualIncome" required>
+                  <option value="">Select Income Range</option>
+                  <option value="below_20k">Less than 20,000</option>
+                  <option value="50k_100k">50,000 - 100,000</option>
+                  <option value="more_100k">More than 100,000</option>
+                </select>
               </div>
             </div>
           </div>
@@ -585,6 +596,8 @@
   const permanentProvince = document.getElementById("permanentProvince");
   const presentCity = document.getElementById("presentCity");
   const permanentCity = document.getElementById("permanentCity");
+  const presentBarangay = document.getElementById("presentBarangay");
+  const permanentBarangay = document.getElementById("permanentBarangay");
 
   // load provinces into a select element
   function loadProvinces(selectEl) {
@@ -617,6 +630,23 @@
       })
       .catch(err => console.error("Failed to load cities:", err));
   }
+  // load barangays for a cityCode into a barangaySelect
+function loadBarangays(cityCode, barangaySelect) {
+  barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+  if (!cityCode) return Promise.resolve();
+
+  return fetch(`https://psgc.cloud/api/cities-municipalities/${cityCode}/barangays`)
+    .then(response => response.json())
+    .then(data => {
+      data.forEach(brgy => {
+        const option = document.createElement("option");
+        option.value = brgy.code;
+        option.textContent = brgy.name;
+        barangaySelect.appendChild(option);
+      });
+    })
+    .catch(err => console.error("Failed to load barangays:", err));
+}
 
   // populate both province selects
   Promise.all([loadProvinces(presentProvince), loadProvinces(permanentProvince)])
@@ -630,35 +660,61 @@
   permanentProvince.addEventListener("change", function () {
     loadCities(this.value, permanentCity);
   });
+    // when city changes, load its barangays
+  // when city changes, load barangays
+presentCity.addEventListener("change", function () {
+  loadBarangays(this.value, presentBarangay);
+});
 
-  // Same-as-Present logic (copies address, province, city, zip)
+permanentCity.addEventListener("change", function () {
+  loadBarangays(this.value, permanentBarangay);
+});
+  
+
+  // Same-as-Present logic (copies address, province, city, barangay, zip)
   const sameAsCheckbox = document.getElementById("sameAsPresent");
 
   function copyPresentToPermanent() {
-    document.getElementById("permanentAddress").value = document.getElementById("presentAddress").value;
-    document.getElementById("permanentZip").value = document.getElementById("presentZip").value;
+  document.getElementById("permanentAddress").value = document.getElementById("presentAddress").value;
+  document.getElementById("permanentZip").value = document.getElementById("presentZip").value;
 
-    const presentProvVal = presentProvince.value;
-    permanentProvince.value = presentProvVal;
+  const presentProvVal = presentProvince.value;
+  const presentCityVal = presentCity.value;
+  const presentBrgyVal = document.getElementById("presentBarangay").value;
 
-    if (presentProvVal) {
-      // load corresponding cities into permanentCity then set value
-      loadCities(presentProvVal, permanentCity)
-        .then(() => {
-          permanentCity.value = presentCity.value || "";
-        });
-    } else {
-      permanentCity.innerHTML = '<option value="">Select City</option>';
-      permanentCity.value = "";
-    }
+  permanentProvince.value = presentProvVal;
+
+  if (presentProvVal) {
+    // load corresponding cities into permanentCity then set value
+    loadCities(presentProvVal, permanentCity)
+      .then(() => {
+        permanentCity.value = presentCityVal || "";
+
+        if (presentCityVal) {
+          // load barangays for this city and then select the same barangay
+          loadBarangays(presentCityVal, document.getElementById("permanentBarangay"))
+            .then(() => {
+              document.getElementById("permanentBarangay").value = presentBrgyVal || "";
+            });
+        }
+      });
+  } else {
+    permanentCity.innerHTML = '<option value="">Select City</option>';
+    permanentCity.value = "";
+    document.getElementById("permanentBarangay").innerHTML = '<option value="">Select Barangay</option>';
   }
+}
 
   function clearPermanentFields() {
-    document.getElementById("permanentAddress").value = "";
-    document.getElementById("permanentZip").value = "";
-    permanentProvince.value = "";
-    permanentCity.innerHTML = '<option value="">Select City</option>';
-  }
+  document.getElementById("permanentAddress").value = "";
+  document.getElementById("permanentZip").value = "";
+  permanentProvince.value = "";
+  permanentCity.innerHTML = '<option value="">Select City</option>';
+  document.getElementById("permanentBarangay").innerHTML = '<option value="">Select Barangay</option>';
+}
+  document.getElementById("presentBarangay").addEventListener("change", () => {
+  if (sameAsCheckbox.checked) copyPresentToPermanent();
+});
 
   sameAsCheckbox.addEventListener("change", function () {
     if (this.checked) {
@@ -683,7 +739,13 @@
     if (sameAsCheckbox.checked) copyPresentToPermanent();
   });
 });
-
+    // Restrict Zip Code inputs to numbers only
+    ["presentZip", "permanentZip"].forEach(id => {
+      const zipInput = document.getElementById(id);
+      zipInput.addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, ""); // remove non-digits
+    });
+ });
 
     </script>
   </body>
