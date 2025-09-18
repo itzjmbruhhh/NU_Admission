@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .models  import Student
+from .utils import write_feature_json
 
 
 def index(request):
@@ -172,6 +173,16 @@ def register_student(request):
         permanent_province = form.get("permanentProvince", "")
         permanent_city = form.get("permanentCity", "")
         permanent_brgy = form.get("permanentBarangay", "")
+
+        # Fallback: if permanent address fields empty, copy from current
+        if not permanent_region:
+            permanent_region = current_region
+        if not permanent_province:
+            permanent_province = current_province
+        if not permanent_city:
+            permanent_city = current_city
+        if not permanent_brgy:
+            permanent_brgy = current_brgy
         birth_country = form.get("birthCountry", "")
         student_type = form.get("studentType", "")
         school_type = form.get("schoolType", "")
@@ -180,13 +191,35 @@ def register_student(request):
         indigenous_bin = 1 if form.get("indigenous", "").strip() else 0
 
         # --- Save to DB (prediction removed) ---
+        # Compute age at enrollment
+        birth_date_str = form.get("birthDate")
+        age_at_enrollment = None
+        if birth_date_str:
+            try:
+                year, month, day = map(int, birth_date_str.split('-'))
+                bdt = date(year, month, day)
+                today = date.today()
+                age_at_enrollment = today.year - bdt.year - ((today.month, today.day) < (bdt.month, bdt.day))
+            except Exception:
+                age_at_enrollment = None
+
+        school_year_val = form.get("schoolYear")
+        derived_recent_year = None
+        if school_year_val and '-' in school_year_val:
+            try:
+                derived_recent_year = int(school_year_val.split('-')[-1])
+            except Exception:
+                derived_recent_year = None
+
         student = Student.objects.create(
-            school_year=form.get("schoolYear"),
-            school_term=school_term,
+            school_year=school_year_val,
+            # Override school_term with the recent year for modeling convenience if derivable
+            school_term=str(derived_recent_year) if derived_recent_year else school_term,
             campus_code=form.get("campus"),
             program_first_choice=program_first_choice,
             program_second_choice=program_second_choice,
             entry_level=entry_level,
+            full_name=f"{form.get('lastName','').upper()}, {form.get('firstName','').upper()} {form.get('middleName','').upper()}".strip(),
             first_name=form.get("firstName"),
             middle_name=form.get("middleName"),
             last_name=form.get("lastName"),
@@ -202,6 +235,7 @@ def register_student(request):
             citizen_of=citizen_of,
             religion=religion,
             complete_present_address=form.get("presentAddress"),
+            current_street=form.get("presentAddress"),
             current_region=current_region,
             current_province=current_province,
             current_city=current_city,
@@ -212,6 +246,7 @@ def register_student(request):
             permanent_province=permanent_province,
             permanent_city=permanent_city,
             permanent_brgy=permanent_brgy,
+            permanent_street=form.get("permanentAddress") or form.get("presentAddress"),
             permanent_postal_code=form.get("permanentZip"),
             email=form.get("emailAddress"),
             mobile_number=form.get("mobileNumber"),
@@ -222,10 +257,17 @@ def register_student(request):
             disability=disability_bin,
             indigenous=indigenous_bin,
             annual_income=form.get("annualIncome"),
-            enrollment_chance=None
+            enrollment_chance=None,
+            age_at_enrollment=age_at_enrollment
         )
         student.save()
+        # After saving, export features for model prediction
+        try:
+            feature_path = write_feature_json(student)
+        except Exception as e:
+            # Log or handle error; for now, attach message in context
+            feature_path = None
         # Render simple confirmation page (prediction removed)
-        return render(request, "registration_result.html", {"student": student})
+        return render(request, "registration_result.html", {"student": student, "feature_file": feature_path})
 
     return render(request, "registration.html")
