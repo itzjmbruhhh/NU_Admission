@@ -25,7 +25,7 @@ def _load_model():
     if _model is not None or _model_load_error is not None:
         return _model
     try:
-        path = os.path.join(settings.BASE_DIR, 'admissions', 'resources', 'rf_model.pkl')
+        path = os.path.join(settings.BASE_DIR, 'admissions', 'resources', 'rf_ucModel.pkl')
         _model = joblib.load(path)
         logger.info("Loaded RF model from %s", path)
     except Exception as exc:
