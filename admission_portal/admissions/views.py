@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from .models  import Student
 from .utils import write_feature_json
+from .ml_utils import compute_and_save_enrollment_chance
 
 
 def index(request):
@@ -261,13 +262,45 @@ def register_student(request):
             age_at_enrollment=age_at_enrollment
         )
         student.save()
-        # After saving, export features for model prediction
+        # After saving, compute probability (model inference) and export feature JSON (best-effort)
+        # Note: compute_and_save_enrollment_chance() persists the probability to student.enrollment_chance
+        try:
+            probability = compute_and_save_enrollment_chance(student)
+        except Exception:
+            probability = None
         try:
             feature_path = write_feature_json(student)
-        except Exception as e:
-            # Log or handle error; for now, attach message in context
+        except Exception:
             feature_path = None
-        # Render simple confirmation page (prediction removed)
-        return render(request, "registration_result.html", {"student": student, "feature_file": feature_path})
+        label = None
+        if probability is not None:
+            label = "Likely to Enroll" if probability >= 0.5 else "Unlikely to Enroll"
+        return render(
+            request,
+            "registration_result.html",
+            {
+                "student": student,
+                "feature_file": feature_path,
+                "enrollment_probability": probability,
+                "enrollment_percent": round(probability * 100, 2) if probability is not None else None,
+                "enrollment_label": label,
+            },
+        )
 
     return render(request, "registration.html")
+
+# Optional future improvement:
+# Instead of calling compute_and_save_enrollment_chance inside the view, you can
+# move this logic to a Django post_save signal for Student so every creation (or
+# update meeting certain criteria) automatically refreshes the enrollment_chance.
+# Example skeleton (place in signals.py and import in apps.py ready()):
+#
+# from django.db.models.signals import post_save
+# from django.dispatch import receiver
+# from .models import Student
+# from .ml_utils import compute_and_save_enrollment_chance
+#
+# @receiver(post_save, sender=Student)
+# def update_enrollment_chance(sender, instance, created, **kwargs):
+#     if created and instance.enrollment_chance is None:
+#         compute_and_save_enrollment_chance(instance)
