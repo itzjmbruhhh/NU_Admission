@@ -86,4 +86,29 @@ class Student(models.Model):
 
     def __str__(self):
         return f"{self.student_id or 'N/A'} - {self.full_name or self.program_first_choice or 'No Name'}"
+
+    @property
+    def name(self) -> str:
+        """Friendly display name for tables: "Last, First Middle Suffix".
+        Falls back gracefully if parts are missing.
+        """
+        last = (self.last_name or "").strip()
+        first = (self.first_name or "").strip()
+        middle = (self.middle_name or "").strip()
+        suffix = (self.suffix or "").strip()
+
+        parts_right = first
+        if middle:
+            parts_right = f"{parts_right} {middle}"
+        if suffix:
+            parts_right = f"{parts_right} {suffix}"
+
+        if last and parts_right:
+            return f"{last}, {parts_right}".strip()
+
+        # Fallbacks
+        if self.full_name:
+            return self.full_name.strip()
+        # At least return something non-empty if available
+        return (first or last or middle or suffix or "").strip()
     
