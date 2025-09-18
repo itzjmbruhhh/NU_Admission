@@ -45,6 +45,7 @@ def adminDash(request):
     program = request.GET.get('program')
     school_year = request.GET.get('school_year')
     status = request.GET.get('status')
+    enroll_chance = request.GET.get('enroll_chance')
 
     # Order by latest registration (most recent first)
     students = Student.objects.all().order_by('-id')
@@ -58,6 +59,16 @@ def adminDash(request):
         students = students.filter(student_id__isnull=True) | students.filter(student_id__exact='')
     if student_id:
         students = students.filter(student_id__icontains=student_id)
+
+    # Enrollment chance threshold filters (now stored as percentage 0..100)
+    if enroll_chance == 'lt_40':
+        students = students.filter(enrollment_chance__lt=40)
+    elif enroll_chance == 'gte_40':
+        students = students.filter(enrollment_chance__gte=40)
+    elif enroll_chance == 'gte_70':
+        students = students.filter(enrollment_chance__gte=70)
+    elif enroll_chance == 'gte_90':
+        students = students.filter(enrollment_chance__gte=90)
 
     # Pagination
     paginator = Paginator(students, 10)
@@ -131,6 +142,7 @@ def adminDash(request):
         'selected_program': program,
         'selected_status': status,
         'selected_school_year': school_year,
+    'selected_enroll_chance': enroll_chance,
         'current_enrolled_count': current_enrolled_count,
         'current_year': current_year,
         'current_term': current_term,
@@ -205,17 +217,23 @@ def register_student(request):
                 age_at_enrollment = None
 
         school_year_val = form.get("schoolYear")
+        # Extract the latest year from a range like "2024-2025" (store "2025")
         derived_recent_year = None
-        if school_year_val and '-' in school_year_val:
+        if school_year_val:
             try:
-                derived_recent_year = int(school_year_val.split('-')[-1])
+                parts = str(school_year_val).split('-')
+                if len(parts) >= 2:
+                    derived_recent_year = int(parts[-1])
+                else:
+                    derived_recent_year = int(parts[0])
             except Exception:
                 derived_recent_year = None
 
         student = Student.objects.create(
-            school_year=school_year_val,
-            # Override school_term with the recent year for modeling convenience if derivable
-            school_term=str(derived_recent_year) if derived_recent_year else school_term,
+            # Store only the latest year (e.g., 2025) in school_year
+            school_year=str(derived_recent_year) if derived_recent_year is not None else school_year_val,
+            # Keep the submitted term (1st/2nd/3rd)
+            school_term=school_term,
             campus_code=form.get("campus"),
             program_first_choice=program_first_choice,
             program_second_choice=program_second_choice,
@@ -272,18 +290,14 @@ def register_student(request):
             feature_path = write_feature_json(student)
         except Exception:
             feature_path = None
-        label = None
-        if probability is not None:
-            label = "Likely to Enroll" if probability >= 0.5 else "Unlikely to Enroll"
+        # Instead of showing a separate results page, return to the registration
+        # screen with a success/loading modal and a button to go to Home.
+        # Keep context minimal; UI does not display model details now.
         return render(
             request,
-            "registration_result.html",
+            "registration.html",
             {
-                "student": student,
-                "feature_file": feature_path,
-                "enrollment_probability": probability,
-                "enrollment_percent": round(probability * 100, 2) if probability is not None else None,
-                "enrollment_label": label,
+                "submission_success": True,
             },
         )
 

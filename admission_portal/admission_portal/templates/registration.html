@@ -549,6 +549,23 @@
       </div>
     </div>
 
+    <!-- Success/Loading Modal shown after submit -->
+    <div id="successModal" class="modal modal-success" style="display: none">
+      <div class="modal-content">
+        <div class="modal-header" style="justify-content: center">
+          <h3>Processing Application</h3>
+        </div>
+        <div class="modal-body">
+          <p>We received your application. You can proceed to the home page.</p>
+          <br />
+          <br />
+          <div class="actions">
+            <a href="https://onlineapp.national-u.edu.ph/quest/home.php" class="submit-btn">Go to Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       (function () {
         const formEl = document.getElementById("registrationForm");
@@ -680,6 +697,15 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
+        // If backend indicates success, show success/loading modal
+        const successFlag =
+          "{{ submission_success|yesno:'true,false'|default:'false' }}".toLowerCase() ===
+          "true";
+        if (successFlag === true) {
+          const successModal = document.getElementById("successModal");
+          if (successModal) successModal.style.display = "block";
+        }
+
         // Birth still only needs province/city, reuse old province-only loader if desired or add region later.
         loadRegions(
           "currentRegion",
