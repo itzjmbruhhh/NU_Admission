@@ -1,408 +1,779 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Registration - NU Lipa Smart Admission</title>
-    <link rel="stylesheet" href="{% static 'css/registration.css' %}">
-</head>
-<body>
+    <link rel="stylesheet" href="{% static 'css/registration.css' %}" />
+  </head>
+  <body>
     <div class="header">
-        <div class="logo">
-            <h1>NUQuest</h1>
-            <span>Smart Admission System</span>
-        </div>
+      <div class="logo">
+        <h1>NUQuest</h1>
+        <span>Smart Admission System</span>
+      </div>
     </div>
 
     <div class="container">
-        <div class="form-container">
-            <h2 class="form-title">Student Registration Form</h2>
-            
-            <form id="registrationForm" method="POST" action="{% url 'register' %}">
-                {% csrf_token %}
-                <!-- Admission Section -->
-                <div class="section">
-                    <h3 class="section-title">I. Admission Information</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="schoolYear">School Year *</label>
-                            <select id="schoolYear" name="schoolYear" required>
-                                <option value="">Select School Year</option>
-                                <option value="2024-2025">2024-2025</option>
-                                <option value="2025-2026">2025-2026</option>
-                                <option value="2027-2028">2027-2028</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="schoolTerm">School Term *</label>
-                            <select id="schoolTerm" name="schoolTerm" required>
-                                <option value="">Select Term</option>
-                                <option value="1st">1st Term</option>
-                                <option value="2nd">2nd Term</option>
-                                <option value="3rd">3rd Term</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="campus">Campus *</label>
-                            <select id="campus" name="campus" required>
-                                <option value="">Select Campus</option>
-                                <option value="NU-Lipa">NU-Lipa</option>
-                                <option value="NU-Manila">NU-Manila</option>
-                                <option value="NU-Laguna">NU-Laguna</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="firstChoice">Program Choice (1st Choice) *</label>
-                            <select id="firstChoice" name="firstChoice" required>
-                                <option value="">Select Program</option>
-                                <option value="BS Information Technology">BS Information Technology</option>
-                                <option value="BS Computer Science">BS Computer Science</option>
-                                <option value="BS Civil Engineering">BS Civil Engineering</option>
-                                <option value="BS Business Administration">BS Business Administration</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="secondChoice">Program Choice (2nd Choice) *</label>
-                            <select id="secondChoice" name="secondChoice" required>
-                                <option value="">Select Program</option>
-                                <option value="BS Information Technology">BS Information Technology</option>
-                                <option value="BS Computer Science">BS Computer Science</option>
-                                <option value="BS Civil Engineering">BS Civil Engineering</option>
-                                <option value="BS Business Administration">BS Business Administration</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="studentType">Student Type *</label>
-                            <select id="studentType" name="studentType" required>
-                                <option value="">Select Student Type</option>
-                                <option value="Full Time">Full Time</option>
-                                <option value="Part-Time">Part-Time</option>
-                                <option value="Transferee">Transferee</option>
-                                <option value="Returnee">Returnee</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+      <div class="form-container">
+        <h2 class="form-title">Student Registration Form</h2>
 
-                <!-- Personal Information Section -->
-                <div class="section">
-                    <h3 class="section-title">II. Personal Information</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="lastName">Last Name *</label>
-                            <input type="text" id="lastName" name="lastName" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="firstName">First Name *</label>
-                            <input type="text" id="firstName" name="firstName" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="middleName">Middle Name *</label>
-                            <input type="text" id="middleName" name="middleName" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="suffix">Suffix (if applicable)</label>
-                            <input type="text" id="suffix" name="suffix">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="gender">Gender *</label>
-                            <select id="gender" name="gender" required>
-                                <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="civilStatus">Civil Status *</label>
-                            <select id="civilStatus" name="civilStatus" required>
-                                <option value="">Select Civil Status</option>
-                                <option value="Single">Single</option>
-                                <option value="Married">Married</option>
-                                <option value="Divorced">Divorced</option>
-                                <option value="Widowed">Widowed</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="birthDate">Birth Date *</label>
-                            <input type="date" id="birthDate" name="birthDate" required>
-                        </div>
+        <form id="registrationForm" method="POST" action="{% url 'register' %}">
+          {% csrf_token %}
+          <!-- Admission Section -->
+          <div class="section">
+            <h3 class="section-title">I. Admission Information</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="schoolYear">School Year *</label>
+                <select id="schoolYear" name="schoolYear" required>
+                  <option value="">Select School Year</option>
+                  <option value="2024-2025">2024-2025</option>
+                  <option value="2025-2026">2025-2026</option>
+                  <option value="2027-2028">2027-2028</option>
+                </select>
+              </div>
 
-                        <div class="form-group">
-                            <label for="province">Birth Place *</label>
-                            <select id="province" name="province" required>
-                                <option value="">Select Province</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="city">Birth City/Municipality *</label>
-                            <select id="city" name="city" required>
-                                <option value="">Select City</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="nationality">Nationality *</label>
-                            <input type="text" id="nationality" name="nationality" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="religion">Religion *</label>
-                            <input type="text" id="religion" name="religion" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="indigenous">Indigenous *</label>
-                            <select id="indigenous" name="indigenous"  required>
-                                <option value="">Select Indigency</option>
-                                <option value="aeta">Aeta</option>
-                                <option value="igorot">Igorot</option>
-                                <option value="mangyan">Mangyan</option>
-                                <option value="waray">Waray</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="disability">Disability *</label>
-                            <input type="text" id="disability" name="disability" required>
-                        </div>
-                    </div>
-                </div>
+              <div class="form-group">
+                <label for="schoolTerm">School Term *</label>
+                <select id="schoolTerm" name="schoolTerm" required>
+                  <option value="">Select Term</option>
+                  <option value="1st">1st Term</option>
+                  <option value="2nd">2nd Term</option>
+                  <option value="3rd">3rd Term</option>
+                </select>
+              </div>
 
-                <!-- Contact Information Section -->
-                <div class="section">
-                    <h3 class="section-title">III. Contact Information</h3>
-                    <div class="form-grid">
-                        <div class="form-group full-width">
-                            <label for="presentAddress">Present Address *</label>
-                            <input type="text" id="presentAddress" name="presentAddress" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="province">Province *</label>
-                            <select id="province" name="province" required>
-                                <option value="">Select Province</option>
-                            </select>
-                        </div>
+              <div class="form-group">
+                <label for="campus">Campus *</label>
+                <select id="campus" name="campus" required>
+                  <option value="">Select Campus</option>
+                  <option value="NU-Lipa">NU-Lipa</option>
+                  <option value="NU-Manila">NU-Manila</option>
+                  <option value="NU-Laguna">NU-Laguna</option>
+                </select>
+              </div>
 
-                        <div class="form-group">
-                            <label for="city">City/Municipality *</label>
-                            <select id="city" name="city" required>
-                                <option value="">Select City</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="zipCode">Zip Code *</label>
-                            <input type="text" id="zipCode" name="zipCode" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="mobileNumber">Mobile Number *</label>
-                            <input type="tel" id="mobileNumber" name="mobileNumber" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="emailAddress">Email Address *</label>
-                            <input type="email" id="emailAddress" name="emailAddress" required>
-                        </div>
-                        <div class="form-group full-width">
-                            <label for="permanentAddress">Permanent Address *</label>
-                            <input type="text" id="permanentAddress" name="permanentAddress" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="province">Province *</label>
-                            <select id="province" name="province" required>
-                                <option value="">Select Province</option>
-                            </select>
-                        </div>
+              <div class="form-group">
+                <label for="firstChoice">Program Choice (1st Choice) *</label>
+                <select id="firstChoice" name="firstChoice" required>
+                  <option value="">Select Program</option>
+                  <optgroup
+                    label="School of Accountancy, Business, and Management(SABM)"
+                  >
+                    <option value="BS Accountancy">
+                      Bachelor of Science in Accountancy
+                    </option>
+                    <option value="BS Business Administration">
+                      Bachelor of Science in Business Administration major in
+                      Financial Management
+                    </option>
+                    <option value="BS Marketing Management">
+                      Bachelor of Science in Business Administration major in
+                      Marketing Management
+                    </option>
+                    <option value="BS Tourism">
+                      Bachelor of Science in Tourism Management
+                    </option>
+                  </optgroup>
+                  <optgroup
+                    label="School of Architecture, Computing, and Engineering (SACE)"
+                  >
+                    <option value="BS Architecture">
+                      Bachelor of Science in Architecture
+                    </option>
+                    <option value="BS Civil Engineering">
+                      Bachelor of Science in Civil Engineering
+                    </option>
+                    <option value="BS Computer Science">
+                      Bachelor of Science in Computer Science
+                    </option>
+                    <option value="BS Information Technology">
+                      Bachelor of Science in Information Technology with
+                      specilization in Mobile and Web Applications
+                    </option>
+                  </optgroup>
+                  <optgroup label="School of Allied Health and Sciences (SAHS)">
+                    <option value="BS MedTech">
+                      Bachelor of Science in Medical Technology
+                    </option>
+                    <option value="BS Nursing">
+                      Bachelor of Science in Nursing
+                    </option>
+                    <option value="BS Psychology">
+                      Bachelor of Science in Psychology
+                    </option>
+                  </optgroup>
+                </select>
+              </div>
 
-                        <div class="form-group">
-                            <label for="city">City/Municipality *</label>
-                            <select id="city" name="city" required>
-                                <option value="">Select City</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="zipCode">Zip Code *</label>
-                            <input type="text" id="zipCode" name="zipCode" required>
-                        </div>
-                    </div>
-                </div>
+              <div class="form-group">
+                <label for="secondChoice">Program Choice (2nd Choice) *</label>
+                <select id="secondChoice" name="secondChoice" required>
+                  <option value="">Select Program</option>
+                  <optgroup
+                    label="School of Accountancy, Business, and Management(SABM)"
+                  >
+                    <option value="BS Accountancy">
+                      Bachelor of Science in Accountancy
+                    </option>
+                    <option value="BS Business Administration">
+                      Bachelor of Science in Business Administration major in
+                      Financial Management
+                    </option>
+                    <option value="BS Marketing Management">
+                      Bachelor of Science in Business Administration major in
+                      Marketing Management
+                    </option>
+                    <option value="BS Tourism">
+                      Bachelor of Science in Tourism
+                    </option>
+                  </optgroup>
+                  <optgroup
+                    label="School of Architecture, Computing, and Engineering (SACE)"
+                  >
+                    <option value="BS Architecture">
+                      Bachelor of Science in Architecture
+                    </option>
+                    <option value="BS Civil Engineering">
+                      Bachelor of Science in Civil Engineering
+                    </option>
+                    <option value="BS Computer Science">
+                      Bachelor of Science in Computer Science
+                    </option>
+                    <option value="BS Information Technology">
+                      Bachelor of Science in Information Technology with
+                      specilization in Mobile and Web Applications
+                    </option>
+                  </optgroup>
+                  <optgroup label="School of Allied Health and Sciences (SAHS)">
+                    <option value="BS MedTech">
+                      Bachelor of Science in Medical Technology
+                    </option>
+                    <option value="BS Nursing">
+                      Bachelor of Science in Nursing
+                    </option>
+                    <option value="BS Psychology">
+                      Bachelor of Science in Psychology
+                    </option>
+                  </optgroup>
+                </select>
+              </div>
 
-                <!-- Family Background Section -->
-                <div class="section">
-                    <h3 class="section-title">IV. Family Background</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="fatherName">Father's Full Name *</label>
-                            <input type="text" id="fatherName" name="fatherName" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="fatherOccupation">Father's Occupation *</label>
-                            <input type="text" id="fatherOccupation" name="fatherOccupation" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="motherName">Mother's Full Name *</label>
-                            <input type="text" id="motherName" name="motherName" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="motherOccupation">Mother's Occupation *</label>
-                            <input type="text" id="motherOccupation" name="motherOccupation" required>
-                        </div>
-                        
-                        <div class="form-group full-width">
-                            <label for="guardianContact">Guardian's Contact Information *</label>
-                            <input type="text" id="guardianContact" name="guardianContact" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="annualIncome">Annual Income *</label>
-                            <input type="text" id="annualIncome" name="annualIncome" placeholder="(e.g., 50,000 or 100,000)" required>
-                        </div>
-                    </div>
-                </div>
+              <div class="form-group">
+                <label for="studentType">Student Type *</label>
+                <select id="studentType" name="studentType" required>
+                  <option value="">Select Student Type</option>
+                  <option value="Full Time">Full Time</option>
+                  <option value="Part-Time">Part-Time</option>
+                  <option value="Transferee">Transferee</option>
+                  <option value="Returnee">Returnee</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
-                <!-- Consent & Agreements Section -->
-                <div class="section">
-                    <h3 class="section-title">V. Consent & Agreements</h3>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="truthfulInfo" name="truthfulInfo" required>
-                            <label for="truthfulInfo">I certify that all information provided is true and accurate to the best of my knowledge. *</label>
-                        </div>
-                        
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="dataPrivacy" name="dataPrivacy" required>
-                            <label for="dataPrivacy">I agree to the school's data privacy policy regarding the processing of my personal information. *</label>
-                        </div>
-                    </div>
-                </div>
+          <!-- Personal Information Section -->
+          <div class="section">
+            <h3 class="section-title">II. Personal Information</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="lastName">Last Name *</label>
+                <input type="text" id="lastName" name="lastName" required />
+              </div>
 
-                <!-- Submit Button -->
-                <div class="submit-section">
-                    <button type="submit" class="submit-btn">Submit Application</button>
-                </div>
-            </form>
-        </div>
+              <div class="form-group">
+                <label for="firstName">First Name *</label>
+                <input type="text" id="firstName" name="firstName" required />
+              </div>
+
+              <div class="form-group">
+                <label for="middleName">Middle Name *</label>
+                <input type="text" id="middleName" name="middleName" required />
+              </div>
+
+              <div class="form-group">
+                <label for="suffix">Suffix (if applicable)</label>
+                <input type="text" id="suffix" name="suffix" />
+              </div>
+
+              <div class="form-group">
+                <label for="gender">Gender *</label>
+                <select id="gender" name="gender" required>
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="civilStatus">Civil Status *</label>
+                <select id="civilStatus" name="civilStatus" required>
+                  <option value="">Select Civil Status</option>
+                  <option value="Single">Single</option>
+                  <option value="Married">Married</option>
+                  <option value="Divorced">Divorced</option>
+                  <option value="Widowed">Widowed</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="birthDate">Birth Date *</label>
+                <input type="date" id="birthDate" name="birthDate" required />
+              </div>
+
+              <div class="form-group">
+                <label for="birthProvince">Birth Place *</label>
+                <select id="birthProvince" name="birthProvince" required>
+                  <option value="">Select Province</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="birthCity">Birth City/Municipality *</label>
+                <select id="birthCity" name="birthCity" required>
+                  <option value="">Select City</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="nationality">Nationality *</label>
+                <input
+                  type="text"
+                  id="nationality"
+                  name="nationality"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="religion">Religion *</label>
+                <input type="text" id="religion" name="religion" required />
+              </div>
+              <div class="form-group">
+                <label for="indigenous">Indigenous *</label>
+                <select id="indigenous" name="indigenous" required>
+                  <option value="">Select Indigency</option>
+                  <option value="aeta">Aeta</option>
+                  <option value="igorot">Igorot</option>
+                  <option value="mangyan">Mangyan</option>
+                  <option value="waray">Waray</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="disability">Disability *</label>
+                <input type="text" id="disability" name="disability" required />
+              </div>
+              <div class="form-group">
+                <label for="emailAddress">Email Address *</label>
+                <input
+                  type="email"
+                  id="emailAddress"
+                  name="emailAddress"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Information Section -->
+          <div class="section">
+            <h3 class="section-title">III. Contact Information</h3>
+            <div class="form-grid">
+              <!-- Present Address -->
+              <div class="form-group full-width">
+                <label
+                  for="presentAddress"
+                  style="font-size: 1.2em; font-weight: bold"
+                  >Present Address *</label
+                >
+                <input
+                  type="text"
+                  id="presentAddress"
+                  name="presentAddress"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="presentProvince">Province *</label>
+                <select id="presentProvince" name="presentProvince" required>
+                  <option value="">Select Province</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="presentCity">City/Municipality *</label>
+                <select id="presentCity" name="presentCity" required>
+                  <option value="">Select City</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="presentBarangay">Barangay *</label>
+                <select id="presentBarangay" name="presentBarangay" required>
+                  <option value="">Select Barangay</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="presentZip">Zip Code *</label>
+                <input type="text" id="presentZip" name="presentZip" required />
+              </div>
+
+              <!-- Contact Details -->
+              <div class="form-group">
+                <label for="mobileNumber">Mobile Number *</label>
+                <input
+                  type="tel"
+                  id="mobileNumber"
+                  name="mobileNumber"
+                  required
+                />
+              </div>
+              <!-- Permanent Address -->
+              <div class="form-group full-width">
+                <label
+                  for="permanentAddress"
+                  style="font-size: 1.2em; font-weight: bold"
+                >
+                  Permanent Address *
+                  <input type="checkbox" id="sameAsPresent" />
+                  <small>Same as Present Address</small>
+                </label>
+                <input
+                  type="text"
+                  id="permanentAddress"
+                  name="permanentAddress"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="permanentProvince">Province *</label>
+                <select
+                  id="permanentProvince"
+                  name="permanentProvince"
+                  required
+                >
+                  <option value="">Select Province</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="permanentCity">City/Municipality *</label>
+                <select id="permanentCity" name="permanentCity" required>
+                  <option value="">Select City</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="permanentBarangay">Barangay *</label>
+                <select
+                  id="permanentBarangay"
+                  name="permanent Barangay"
+                  required
+                >
+                  <option value="">Select Barangay</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="permanentZip">Zip Code *</label>
+                <input
+                  type="text"
+                  id="permanentZip"
+                  name="permanentZip"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Family Background Section -->
+          <div class="section">
+            <h3 class="section-title">IV. Family Background</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="fatherName">Father's Full Name *</label>
+                <input type="text" id="fatherName" name="fatherName" required />
+              </div>
+
+              <div class="form-group">
+                <label for="fatherOccupation">Father's Occupation *</label>
+                <input
+                  type="text"
+                  id="fatherOccupation"
+                  name="fatherOccupation"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="motherName">Mother's Full Name *</label>
+                <input type="text" id="motherName" name="motherName" required />
+              </div>
+
+              <div class="form-group">
+                <label for="motherOccupation">Mother's Occupation *</label>
+                <input
+                  type="text"
+                  id="motherOccupation"
+                  name="motherOccupation"
+                  required
+                />
+              </div>
+
+              <div class="form-group full-width">
+                <label for="guardianContact"
+                  >Guardian's Contact Information *</label
+                >
+                <input
+                  type="text"
+                  id="guardianContact"
+                  name="guardianContact"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="annualIncome">Annual Income *</label>
+                <select name="annualIncome" id="annualIncome" required>
+                  <option value="">Select Income Range</option>
+                  <option value="below_30k">Less than 30,000</option>
+                  <option value="30k_80k">30,000 - 80,000</option>
+                  <option value="more_80k">More than 80,000</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Consent & Agreements Section -->
+          <div class="section">
+            <h3 class="section-title">V. Consent & Agreements</h3>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  id="truthfulInfo"
+                  name="truthfulInfo"
+                  required
+                />
+                <label for="truthfulInfo"
+                  >I certify that all information provided is true and accurate
+                  to the best of my knowledge. *</label
+                >
+              </div>
+
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  id="dataPrivacy"
+                  name="dataPrivacy"
+                  required
+                />
+                <label for="dataPrivacy"
+                  >I agree to the school's data privacy policy regarding the
+                  processing of my personal information. *</label
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="submit-section">
+            <button type="submit" class="submit-btn">Submit Application</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Error Modal -->
     <div id="errorModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Form Validation Error</h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p id="errorMessage">Please fill in all required fields before submitting the form.</p>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Form Validation Error</h3>
+          <span class="close">&times;</span>
         </div>
+        <div class="modal-body">
+          <p id="errorMessage">
+            Please fill in all required fields before submitting the form.
+          </p>
+        </div>
+      </div>
     </div>
 
     <script>
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const requiredFields = document.querySelectorAll('[required]');
-            let emptyFields = [];
-            
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    emptyFields.push(field.previousElementSibling.textContent.replace(' *', ''));
-                    field.classList.add('error');
-                } else {
-                    field.classList.remove('error');
-                }
-            });
-            
-            if (emptyFields.length > 0) {
-                const modal = document.getElementById('errorModal');
-                const errorMessage = document.getElementById('errorMessage');
-                
-                if (emptyFields.length === 1) {
-                    errorMessage.textContent = `Please fill in the ${emptyFields[0]} field.`;
-                } else {
-                    errorMessage.textContent = `Please fill in the following required fields: ${emptyFields.join(', ')}.`;
-                }
-                
-                modal.style.display = 'block';
+      document
+        .getElementById("registrationForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const requiredFields = document.querySelectorAll("[required]");
+          let emptyFields = [];
+
+          requiredFields.forEach((field) => {
+            if (!field.value.trim()) {
+              emptyFields.push(
+                field.previousElementSibling.textContent.replace(" *", "")
+              );
+              field.classList.add("error");
             } else {
-                alert('Application submitted successfully!');
-                // Here you would typically send the data to a server
+              field.classList.remove("error");
             }
-        });
-        
-        // Close modal functionality
-        document.querySelector('.close').addEventListener('click', function() {
-            document.getElementById('errorModal').style.display = 'none';
-        });
-        
-        window.addEventListener('click', function(e) {
-            const modal = document.getElementById('errorModal');
-            if (e.target === modal) {
-                modal.style.display = 'none';
+          });
+
+          if (emptyFields.length > 0) {
+            const modal = document.getElementById("errorModal");
+            const errorMessage = document.getElementById("errorMessage");
+
+            if (emptyFields.length === 1) {
+              errorMessage.textContent = `Please fill in the ${emptyFields[0]} field.`;
+            } else {
+              errorMessage.textContent = `Please fill in the following required fields: ${emptyFields.join(
+                ", "
+              )}.`;
             }
+
+            modal.style.display = "block";
+          } else {
+            alert("Application submitted successfully!");
+            // Here you would typically send the data to a server
+          }
         });
-        
-        // Remove error class on input
-        document.querySelectorAll('input, select').forEach(field => {
-            field.addEventListener('input', function() {
-                this.classList.remove('error');
+
+      // Close modal functionality
+      document.querySelector(".close").addEventListener("click", function () {
+        document.getElementById("errorModal").style.display = "none";
+      });
+
+      window.addEventListener("click", function (e) {
+        const modal = document.getElementById("errorModal");
+        if (e.target === modal) {
+          modal.style.display = "none";
+        }
+      });
+
+      // Remove error class on input
+      document.querySelectorAll("input, select").forEach((field) => {
+        field.addEventListener("input", function () {
+          this.classList.remove("error");
+        });
+      });
+
+      // Function to load provinces and cities for multiple sections
+      function loadProvinces(provinceSelectId, citySelectId) {
+        const provinceSelect = document.getElementById(provinceSelectId);
+        const citySelect = document.getElementById(citySelectId);
+
+        // Load provinces
+        fetch("https://psgc.cloud/api/provinces")
+          .then((res) => res.json())
+          .then((data) => {
+            data.forEach((province) => {
+              const opt = document.createElement("option");
+              opt.value = province.code;
+              opt.textContent = province.name;
+              provinceSelect.appendChild(opt);
+            });
+          });
+
+        // Load cities when province changes
+        provinceSelect.addEventListener("change", function () {
+          const provinceCode = this.value;
+          citySelect.innerHTML = '<option value="">Select City</option>';
+          if (!provinceCode) return;
+
+          fetch(
+            `https://psgc.cloud/api/provinces/${provinceCode}/cities-municipalities`
+          )
+            .then((res) => res.json())
+            .then((data) => {
+              data.forEach((city) => {
+                const opt = document.createElement("option");
+                opt.value = city.code;
+                opt.textContent = city.name;
+                citySelect.appendChild(opt);
+              });
             });
         });
+      }
 
-        // Dynamic Province and City Selection
-        document.addEventListener("DOMContentLoaded", function () {
-    const provinceSelect = document.getElementById("province");
-    const citySelect = document.getElementById("city");
+      // Apply to each section
+      document.addEventListener("DOMContentLoaded", () => {
+        loadProvinces("birthProvince", "birthCity");
+        loadProvinces("presentProvince", "presentCity");
+        loadProvinces("permanentProvince", "permanentCity");
+      });
 
-    // Load provinces
-    fetch("https://psgc.cloud/api/provinces")
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(province => {
+      document.addEventListener("DOMContentLoaded", function () {
+        const provinceApi = "https://psgc.cloud/api/provinces";
+
+        const presentProvince = document.getElementById("presentProvince");
+        const permanentProvince = document.getElementById("permanentProvince");
+        const presentCity = document.getElementById("presentCity");
+        const permanentCity = document.getElementById("permanentCity");
+        const presentBarangay = document.getElementById("presentBarangay");
+        const permanentBarangay = document.getElementById("permanentBarangay");
+
+        // load provinces into a select element
+        function loadProvinces(selectEl) {
+          return fetch(provinceApi)
+            .then((response) => response.json())
+            .then((data) => {
+              data.forEach((prov) => {
                 const option = document.createElement("option");
-                option.value = province.code;
-                option.textContent = province.name;
-                provinceSelect.appendChild(option);
-            });
+                option.value = prov.code;
+                option.textContent = prov.name;
+                selectEl.appendChild(option);
+              });
+            })
+            .catch((err) => console.error("Failed to load provinces:", err));
+        }
+
+        // load cities for a provinceCode into a citySelect (returns Promise)
+        function loadCities(provinceCode, citySelect) {
+          citySelect.innerHTML = '<option value="">Select City</option>';
+          if (!provinceCode) return Promise.resolve();
+          return fetch(
+            `https://psgc.cloud/api/provinces/${provinceCode}/cities-municipalities`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              data.forEach((city) => {
+                const option = document.createElement("option");
+                option.value = city.code;
+                option.textContent = city.name;
+                citySelect.appendChild(option);
+              });
+            })
+            .catch((err) => console.error("Failed to load cities:", err));
+        }
+        // load barangays for a cityCode into a barangaySelect
+        function loadBarangays(cityCode, barangaySelect) {
+          barangaySelect.innerHTML =
+            '<option value="">Select Barangay</option>';
+          if (!cityCode) return Promise.resolve();
+
+          return fetch(
+            `https://psgc.cloud/api/cities-municipalities/${cityCode}/barangays`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              data.forEach((brgy) => {
+                const option = document.createElement("option");
+                option.value = brgy.code;
+                option.textContent = brgy.name;
+                barangaySelect.appendChild(option);
+              });
+            })
+            .catch((err) => console.error("Failed to load barangays:", err));
+        }
+
+        // populate both province selects
+        Promise.all([
+          loadProvinces(presentProvince),
+          loadProvinces(permanentProvince),
+        ]).catch(() => {
+          /* already logged */
         });
 
-    // Load cities when province is selected
-    provinceSelect.addEventListener("change", function () {
-        const provinceCode = this.value;
-        citySelect.innerHTML = '<option value="">Select City</option>'; // reset
+        // when province changes, load its cities
+        presentProvince.addEventListener("change", function () {
+          loadCities(this.value, presentCity);
+        });
 
-        if (!provinceCode) return;
+        permanentProvince.addEventListener("change", function () {
+          loadCities(this.value, permanentCity);
+        });
+        // when city changes, load its barangays
+        // when city changes, load barangays
+        presentCity.addEventListener("change", function () {
+          loadBarangays(this.value, presentBarangay);
+        });
 
-        fetch(`https://psgc.cloud/api/provinces/${provinceCode}/cities-municipalities`)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(city => {
-                    const option = document.createElement("option");
-                    option.value = city.code;
-                    option.textContent = city.name;
-                    citySelect.appendChild(option);
+        permanentCity.addEventListener("change", function () {
+          loadBarangays(this.value, permanentBarangay);
+        });
+
+        // Same-as-Present logic (copies address, province, city, barangay, zip)
+        const sameAsCheckbox = document.getElementById("sameAsPresent");
+
+        function copyPresentToPermanent() {
+          document.getElementById("permanentAddress").value =
+            document.getElementById("presentAddress").value;
+          document.getElementById("permanentZip").value =
+            document.getElementById("presentZip").value;
+
+          const presentProvVal = presentProvince.value;
+          const presentCityVal = presentCity.value;
+          const presentBrgyVal =
+            document.getElementById("presentBarangay").value;
+
+          permanentProvince.value = presentProvVal;
+
+          if (presentProvVal) {
+            // load corresponding cities into permanentCity then set value
+            loadCities(presentProvVal, permanentCity).then(() => {
+              permanentCity.value = presentCityVal || "";
+
+              if (presentCityVal) {
+                // load barangays for this city and then select the same barangay
+                loadBarangays(
+                  presentCityVal,
+                  document.getElementById("permanentBarangay")
+                ).then(() => {
+                  document.getElementById("permanentBarangay").value =
+                    presentBrgyVal || "";
                 });
+              }
             });
-    });
-});
+          } else {
+            permanentCity.innerHTML = '<option value="">Select City</option>';
+            permanentCity.value = "";
+            document.getElementById("permanentBarangay").innerHTML =
+              '<option value="">Select Barangay</option>';
+          }
+        }
+
+        function clearPermanentFields() {
+          document.getElementById("permanentAddress").value = "";
+          document.getElementById("permanentZip").value = "";
+          permanentProvince.value = "";
+          permanentCity.innerHTML = '<option value="">Select City</option>';
+          document.getElementById("permanentBarangay").innerHTML =
+            '<option value="">Select Barangay</option>';
+        }
+        document
+          .getElementById("presentBarangay")
+          .addEventListener("change", () => {
+            if (sameAsCheckbox.checked) copyPresentToPermanent();
+          });
+
+        sameAsCheckbox.addEventListener("change", function () {
+          if (this.checked) {
+            copyPresentToPermanent();
+          } else {
+            clearPermanentFields();
+          }
+        });
+
+        // Keep permanent synced while checkbox is checked
+        ["presentAddress", "presentZip"].forEach((id) => {
+          document.getElementById(id).addEventListener("input", () => {
+            if (sameAsCheckbox.checked) copyPresentToPermanent();
+          });
+        });
+
+        // If present province or city changes, update permanent copy if checked
+        presentProvince.addEventListener("change", () => {
+          if (sameAsCheckbox.checked) copyPresentToPermanent();
+        });
+        presentCity.addEventListener("change", () => {
+          if (sameAsCheckbox.checked) copyPresentToPermanent();
+        });
+      });
+      // Restrict Zip Code inputs to numbers only
+      ["presentZip", "permanentZip"].forEach((id) => {
+        const zipInput = document.getElementById(id);
+        zipInput.addEventListener("input", function () {
+          this.value = this.value.replace(/\D/g, ""); // remove non-digits
+        });
+      });
     </script>
-</body>
+  </body>
 </html>
