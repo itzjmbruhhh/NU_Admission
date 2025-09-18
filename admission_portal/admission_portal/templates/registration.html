@@ -335,6 +335,12 @@
                 />
               </div>
               <div class="form-group">
+                <label for="currentRegion">Region *</label>
+                <select id="currentRegion" name="currentRegion" required>
+                  <option value="">Select Region</option>
+                </select>
+              </div>
+              <div class="form-group">
                 <label for="presentProvince">Province *</label>
                 <select id="presentProvince" name="presentProvince" required>
                   <option value="">Select Province</option>
@@ -350,12 +356,6 @@
                 <label for="presentBarangay">Barangay *</label>
                 <select id="presentBarangay" name="presentBarangay" required>
                   <option value="">Select Barangay</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="currentRegion">Region *</label>
-                <select id="currentRegion" name="currentRegion" required>
-                  <option value="">Select Region</option>
                 </select>
               </div>
               <div class="form-group">
@@ -381,6 +381,12 @@
                   name="permanentAddress"
                   required
                 />
+              </div>
+              <div class="form-group">
+                <label for="permanentRegion">Permanent Region *</label>
+                <select id="permanentRegion" name="permanentRegion" required>
+                  <option value="">Select Region</option>
+                </select>
               </div>
               <div class="form-group">
                 <label for="permanentProvince">Province *</label>
@@ -417,12 +423,6 @@
                   value="Philippines"
                   required
                 />
-              </div>
-              <div class="form-group">
-                <label for="permanentRegion">Permanent Region *</label>
-                <select id="permanentRegion" name="permanentRegion" required>
-                  <option value="">Select Region</option>
-                </select>
               </div>
               <div class="form-group">
                 <label for="permanentZip">Zip Code *</label>
@@ -815,7 +815,6 @@
           const currRegion = document.getElementById("currentRegion");
           const permRegion = document.getElementById("permanentRegion");
           permRegion.value = currRegion.value;
-
           const presentProvVal = presentProvince.value; // readable province name
           const presentProvCode =
             presentProvince.selectedOptions[0]?.dataset.code;
