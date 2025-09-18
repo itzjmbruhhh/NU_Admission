@@ -109,8 +109,8 @@
               </div>
 
               <div class="form-group">
-                <label for="secondChoice">Program Choice (2nd Choice) *</label>
-                <select id="secondChoice" name="secondChoice" required>
+                <label for="secondChoice">Program Choice (2nd Choice)</label>
+                <select id="secondChoice" name="secondChoice">
                   <option value="">Select Program</option>
                   <optgroup
                     label="School of Accountancy, Business, and Management(SABM)"
@@ -253,8 +253,8 @@
                 <input type="text" id="religion" name="religion" required />
               </div>
               <div class="form-group">
-                <label for="indigenous">Indigenous *</label>
-                <select id="indigenous" name="indigenous" required>
+                <label for="indigenous">Indigenous</label>
+                <select id="indigenous" name="indigenous">
                   <option value="">Select Indigency</option>
                   <option value="aeta">Aeta</option>
                   <option value="igorot">Igorot</option>
@@ -263,8 +263,8 @@
                 </select>
               </div>
               <div class="form-group">
-                <label for="disability">Disability *</label>
-                <input type="text" id="disability" name="disability" required />
+                <label for="disability">Disability</label>
+                <input type="text" id="disability" name="disability" />
               </div>
               <div class="form-group">
                 <label for="emailAddress">Email Address *</label>
@@ -275,12 +275,21 @@
                   required
                 />
               </div>
+              <div class="form-group">
+                <label for="mobileNumber">Mobile Number *</label>
+                <input
+                  type="tel"
+                  id="mobileNumber"
+                  name="mobileNumber"
+                  required
+                />
+              </div>
             </div>
           </div>
 
           <!-- Contact Information Section -->
           <div class="section">
-            <h3 class="section-title">III. Contact Information</h3>
+            <h3 class="section-title">III. Current and Permanent Address</h3>
             <div class="form-grid">
               <!-- Present Address -->
               <div class="form-group full-width">
@@ -320,15 +329,7 @@
               </div>
 
               <!-- Contact Details -->
-              <div class="form-group">
-                <label for="mobileNumber">Mobile Number *</label>
-                <input
-                  type="tel"
-                  id="mobileNumber"
-                  name="mobileNumber"
-                  required
-                />
-              </div>
+              <div class="form-group"></div>
               <!-- Permanent Address -->
               <div class="form-group full-width">
                 <label
@@ -777,3 +778,26 @@
     </script>
   </body>
 </html>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const sameAsPresent = document.getElementById("sameAsPresent");
+    const permanentFields = [
+      document.getElementById("permanentAddress"),
+      document.getElementById("permanentProvince"),
+      document.getElementById("permanentCity"),
+      document.getElementById("permanentBarangay"),
+      document.getElementById("permanentZip"),
+    ];
+
+    function setPermanentFieldsDisabled(disabled) {
+      permanentFields.forEach((field) => {
+        if (field) field.disabled = disabled;
+      });
+    }
+
+    sameAsPresent.addEventListener("change", function () {
+      setPermanentFieldsDisabled(this.checked);
+    });
+  });
+</script>

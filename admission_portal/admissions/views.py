@@ -152,61 +152,121 @@ def register(request):
 
 def register_student(request):
     if request.method == "POST":
-        # Grab form data by name attributes
-        school_year = request.POST.get("schoolYear")
-        school_term = request.POST.get("schoolTerm")
-        campus = request.POST.get("campus")
-        first_choice = request.POST.get("firstChoice")
-        second_choice = request.POST.get("secondChoice")
-        student_type = request.POST.get("studentType")
-        first_name = request.POST.get("firstName")
-        last_name = request.POST.get("lastName")
-        middle_name = request.POST.get("middleName")
-        suffix = request.POST.get("suffix")
-        gender = request.POST.get("gender")
-        civil_status = request.POST.get("civilStatus")
-        birth_date = request.POST.get("birthDate")
-        birth_place = request.POST.get("birthPlace")
-        nationality = request.POST.get("nationality")
-        religion = request.POST.get("religion")
-        present_address = request.POST.get("presentAddress")
-        city_province = request.POST.get("cityProvince")
-        zip_code = request.POST.get("zipCode")
-        mobile_number = request.POST.get("mobileNumber")
-        email = request.POST.get("emailAddress")
-        father_name = request.POST.get("fatherName")
-        father_occupation = request.POST.get("fatherOccupation")
-        mother_name = request.POST.get("motherName")
-        mother_occupation = request.POST.get("motherOccupation")
-        guardian_contact = request.POST.get("guardianContact")
-        truthful_info = request.POST.get("truthfulInfo")
-        data_privacy = request.POST.get("dataPrivacy")
+        import json
+        import tempfile
+        from .ml_utils import predict_enrollment_chance
 
-        # Save to DB (adjust field names according to your Student model)
+        form = request.POST
+        # --- Feature extraction ---
+        school_term = form.get("schoolTerm")
+        age_at_enrollment = form.get("ageAtEnrollment") or ""
+        requirement_agreement = form.get("truthfulInfo", "No")
+        disability = form.get("disability", "No")
+        indigenous = form.get("indigenous", "No")
+        program_first_choice = form.get("firstChoice", "")
+        program_second_choice = form.get("secondChoice", "")
+        entry_level = form.get("entryLevel", "")
+        birth_city = form.get("birthCity", "")
+        birth_province = form.get("birthProvince", "")
+        gender = form.get("gender", "")
+        citizen_of = form.get("nationality", "")
+        religion = form.get("religion", "")
+        civil_status = form.get("civilStatus", "")
+        current_region = form.get("presentRegion", "")
+        current_province = form.get("presentProvince", "")
+        current_city = form.get("presentCity", "")
+        current_brgy = form.get("presentBarangay", "")
+        permanent_country = form.get("permanentCountry", "")
+        permanent_region = form.get("permanentRegion", "")
+        permanent_province = form.get("permanentProvince", "")
+        permanent_city = form.get("permanentCity", "")
+        permanent_brgy = form.get("permanentBarangay", "")
+        birth_country = form.get("birthCountry", "")
+        student_type = form.get("studentType", "")
+        school_type = form.get("schoolType", "")
+
+        def bin_convert(val):
+            return 1 if str(val).strip().lower() == "yes" else 0
+        requirement_agreement_bin = bin_convert(requirement_agreement)
+        disability_bin = bin_convert(disability)
+        indigenous_bin = bin_convert(indigenous)
+
+        def cap(val):
+            return str(val).strip().upper()
+        cat_fields = [program_first_choice, program_second_choice, entry_level, birth_city, birth_province, gender,
+                     citizen_of, religion, civil_status, current_region, current_province, current_city, current_brgy,
+                     permanent_country, permanent_region, permanent_province, permanent_city, permanent_brgy,
+                     birth_country, student_type, school_type]
+        cat_fields_cap = [cap(f) for f in cat_fields]
+
+        feature_names = [
+            "School Term", "Age at Enrollment", "Requirement Agreement", "Disability", "Indigenous",
+            "Program (First Choice)", "Program (Second Choice)", "Entry Level", "Birth City", "Place of Birth (Province)",
+            "Gender", "Citizen of", "Religion", "Civil Status", "Current Region", "Current Province", "City/Municipality",
+            "Current Brgy.", "Permanent Country", "Permanent Region", "Permanent Province", "Permanent City", "Permanent Brgy.",
+            "Birth Country", "Student Type", "School Type"
+        ]
+        feature_values = [school_term, age_at_enrollment, requirement_agreement_bin, disability_bin, indigenous_bin] + cat_fields_cap
+        features = dict(zip(feature_names, feature_values))
+
+        # --- Create temporary JSON file ---
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp_json:
+            json.dump(features, tmp_json)
+            tmp_json_path = tmp_json.name
+
+        # --- Predict ---
+        features_json = json.dumps(features)
+        pred_label, pred_prob = predict_enrollment_chance(features_json)
+
+        # --- Save to DB ---
         student = Student.objects.create(
-            school_year=school_year,
+            school_year=form.get("schoolYear"),
             school_term=school_term,
-            campus_code=campus,
-            program_first_choice=first_choice,
-            program_second_choice=second_choice,
-            student_type=student_type,
-            # add other fields here...
-            email=email,
-            mobile_number=mobile_number,
-            religion=religion,
+            campus_code=form.get("campus"),
+            program_first_choice=program_first_choice,
+            program_second_choice=program_second_choice,
+            entry_level=entry_level,
+            first_name=form.get("firstName"),
+            middle_name=form.get("middleName"),
+            last_name=form.get("lastName"),
+            suffix=form.get("suffix"),
             gender=gender,
             civil_status=civil_status,
-            birth_date=birth_date,
-            birth_place=birth_place,
-            citizen_of=nationality,
-            complete_present_address=present_address,
-            current_city=city_province,
-            current_postal_code=zip_code,
-            last_school_attended="",  # optional for now
-            requirement_agreement=True if truthful_info and data_privacy else False,
-            enrolled=""
+            birth_date=form.get("birthDate"),
+            birth_place=form.get("birthPlace"),
+            birth_city=birth_city,
+            birth_province=birth_province,
+            birth_country=birth_country,
+            citizen_of=citizen_of,
+            religion=religion,
+            complete_present_address=form.get("presentAddress"),
+            current_region=current_region,
+            current_province=current_province,
+            current_city=current_city,
+            current_brgy=current_brgy,
+            current_postal_code=form.get("presentZip"),
+            permanent_country=permanent_country,
+            permanent_region=permanent_region,
+            permanent_province=permanent_province,
+            permanent_city=permanent_city,
+            permanent_brgy=permanent_brgy,
+            permanent_postal_code=form.get("permanentZip"),
+            email=form.get("emailAddress"),
+            mobile_number=form.get("mobileNumber"),
+            student_type=student_type,
+            school_type=school_type,
+            last_school_attended=form.get("lastSchoolAttended", ""),
+            requirement_agreement=requirement_agreement_bin,
+            disability=disability_bin,
+            indigenous=indigenous_bin,
+            enrollment_chance=pred_prob
         )
         student.save()
-        return redirect("index")  # redirect to homepage after success
+        # Render a result page with prediction
+        return render(request, "registration_result.html", {
+            "student": student,
+            "pred_label": pred_label,
+            "pred_prob": pred_prob
+        })
 
     return render(request, "registration.html")
