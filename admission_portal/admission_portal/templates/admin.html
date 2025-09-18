@@ -172,6 +172,16 @@
                       {% endfor %}
                     </select>
                   </div>
+                  <div class="filter-group">
+                    <label>Enrollment Chance</label>
+                    <select name="enroll_chance">
+                      <option value="">All</option>
+                      <option value="lt_40" {% if selected_enroll_chance == 'lt_40' %}selected{% endif %}>&lt; 40%</option>
+                      <option value="gte_40" {% if selected_enroll_chance == 'gte_40' %}selected{% endif %}>&ge; 40%</option>
+                      <option value="gte_70" {% if selected_enroll_chance == 'gte_70' %}selected{% endif %}>&ge; 70%</option>
+                      <option value="gte_90" {% if selected_enroll_chance == 'gte_90' %}selected{% endif %}>&ge; 90%</option>
+                    </select>
+                  </div>
                 </div>
                 <br>
                   <div class="filter-actions">
@@ -218,9 +228,11 @@
                       >
                     </td>
                     <td>
-                      <span class="chance-badge high"
-                        >{{ student.enrollment_chance }}</span
-                      >
+                      {% if student.enrollment_chance is not None %}
+                        <span class="chance-badge high">{{ student.enrollment_chance|floatformat:2 }}%</span>
+                      {% else %}
+                        <span class="chance-badge" style="background:#ccc;color:#222;">N/A</span>
+                      {% endif %}
                     </td>
                     <td>
                       {% if student.status == 'Enrolled' %}
@@ -255,7 +267,7 @@
               {% if students.has_previous %}
               <a
                 class="btn secondary"
-                href="?{% if selected_program %}program={{ selected_program }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}{% if selected_school_year %}school_year={{ selected_school_year }}&{% endif %}{% if request.GET.student_id %}student_id={{ request.GET.student_id }}&{% endif %}page={{ students.previous_page_number }}"
+                href="?{% if selected_program %}program={{ selected_program }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}{% if selected_school_year %}school_year={{ selected_school_year }}&{% endif %}{% if selected_enroll_chance %}enroll_chance={{ selected_enroll_chance }}&{% endif %}{% if request.GET.student_id %}student_id={{ request.GET.student_id }}&{% endif %}page={{ students.previous_page_number }}"
               >
                 <i class="fas fa-chevron-left"></i> Previous
               </a>
@@ -268,7 +280,7 @@
               {% if students.has_next %}
               <a
                 class="btn secondary"
-                href="?{% if selected_program %}program={{ selected_program }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}{% if selected_school_year %}school_year={{ selected_school_year }}&{% endif %}{% if request.GET.student_id %}student_id={{ request.GET.student_id }}&{% endif %}page={{ students.next_page_number }}"
+                href="?{% if selected_program %}program={{ selected_program }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}{% if selected_school_year %}school_year={{ selected_school_year }}&{% endif %}{% if selected_enroll_chance %}enroll_chance={{ selected_enroll_chance }}&{% endif %}{% if request.GET.student_id %}student_id={{ request.GET.student_id }}&{% endif %}page={{ students.next_page_number }}"
               >
                 Next <i class="fas fa-chevron-right"></i>
               </a>
