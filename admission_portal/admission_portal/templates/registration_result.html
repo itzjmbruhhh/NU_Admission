@@ -88,10 +88,12 @@
         <strong>{{ student.first_name }} {{ student.last_name }}</strong>. Your
         application has been recorded successfully.
       </p>
-      <div class="prediction-box">
-        <strong>Predicted Enrollment Chance:</strong><br />
-        Model Output: <strong>{{ pred_label }}</strong><br />
-        Probability Score: <strong>{{ pred_prob|floatformat:2 }}</strong>
+      <div
+        class="prediction-box"
+        style="background: #f5f7fa; border-left: 5px solid #999"
+      >
+        <strong>Note:</strong> Predictive scoring has been disabled. Your
+        application was stored successfully.
       </div>
       <h2 style="font-size: 1.2rem; margin-top: 30px">Submitted Details</h2>
       <table>
@@ -123,7 +125,8 @@
           <tr>
             <th>Full Name</th>
             <td>
-              {{ student.last_name }}, {{ student.first_name }} {{ student.middle_name }}
+              {{ student.last_name }}, {{ student.first_name }} {{
+              student.middle_name }}
             </td>
           </tr>
           <tr>
