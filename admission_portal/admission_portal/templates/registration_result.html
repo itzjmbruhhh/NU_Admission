@@ -90,10 +90,16 @@
       </p>
       <div
         class="prediction-box"
-        style="background: #f5f7fa; border-left: 5px solid #999"
+        style="background: #f5f7fa; border-left: 5px solid #0055aa"
       >
-        <strong>Note:</strong> Predictive scoring has been disabled. Your
-        application was stored successfully.
+        {% if enrollment_probability is not None %}
+        <strong>Enrollment Probability:</strong>
+        {% if enrollment_percent is not None %} {{ enrollment_percent }}% {%
+        else %} {{ enrollment_probability|floatformat:2 }} {% endif %} –
+        <em>{{ enrollment_label }}</em>
+        {% else %}
+        <strong>Prediction Unavailable:</strong> The probability model could not
+        be applied at this time. {% endif %}
       </div>
       <h2 style="font-size: 1.2rem; margin-top: 30px">Submitted Details</h2>
       <table>
@@ -117,6 +123,10 @@
           <tr>
             <th>Program (2nd)</th>
             <td>{{ student.program_second_choice }}</td>
+          </tr>
+          <tr>
+            <th>Enrollment Chance</th>
+            <td>{{ student.enrollment_chance_display }}</td>
           </tr>
           <tr>
             <th>Student Type</th>

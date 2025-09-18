@@ -1,44 +1,16 @@
-"""Machine Learning utilities (deprecated).
-
-This module previously handled Random Forest probability predictions for
-enrollment chance. The application has removed predictive scoring logic
-and currently does not call these functions. They are retained only for
-potential future re‑enablement or reference. Safe to delete if ML is
-permanently retired.
-"""
-
-import json
+import pandas as pd
 import joblib
 import os
+import logging
 from django.conf import settings
-from typing import Tuple, Any, Dict
-import pandas as pd
+from typing import Dict, Any
+from .models import Student
 
-MODEL_PATH = os.path.join(settings.BASE_DIR, "admissions", "resources", "rf_model.pkl")
+logger = logging.getLogger(__name__)
 
 _model = None
 _model_load_error = None
-
-def _load_model():
-    global _model, _model_load_error
-    if _model is not None or _model_load_error is not None:
-        return _model
-    try:
-        _model = joblib.load(MODEL_PATH)
-    except Exception as exc:
-        _model_load_error = exc
-        _model = None
-    return _model
-
-def capitalize_contents(data):
-    """Recursively uppercase all string leaves in nested dict/list structures."""
-    if isinstance(data, dict):
-        return {k: capitalize_contents(v) for k, v in data.items()}
-    if isinstance(data, list):
-        return [capitalize_contents(v) for v in data]
-    if isinstance(data, str):
-        return data.upper()
-    return data
+_last_prediction_error: Exception | None = None
 
 REQUIRED_FEATURE_ORDER = [
     "School Term", "Age at Enrollment", "Requirement Agreement", "Disability", "Indigenous",
@@ -48,55 +20,71 @@ REQUIRED_FEATURE_ORDER = [
     "Birth Country", "Student Type", "School Type"
 ]
 
-def predict_enrollment_probability(feature_map: Dict[str, Any]) -> float:
-    """Return probability (0..1) of enrollment using the Random Forest model.
+def _load_model():
+    global _model, _model_load_error
+    if _model is not None or _model_load_error is not None:
+        return _model
+    try:
+        path = os.path.join(settings.BASE_DIR, 'admissions', 'resources', 'rf_model.pkl')
+        _model = joblib.load(path)
+        logger.info("Loaded RF model from %s", path)
+    except Exception as exc:
+        _model_load_error = exc
+        _model = None
+        logger.error("Failed to load RF model: %s", exc)
+    return _model
 
-    feature_map must already contain the REQUIRED_FEATURE_ORDER keys.
-    Missing keys fall back to empty string / 0.
+def normalize_features(feature_map: Dict[str, Any]) -> Dict[str, Any]:
     """
-    model = _load_model()
-    if model is None:
-        # Heuristic fallback
-        req = feature_map.get("Requirement Agreement", 0)
-        program = feature_map.get("Program (First Choice)") or ""
-        return 0.65 if (str(req) in {"1","TRUE","YES"} and program) else 0.35
-
-    # Uppercase categorical string values to match expected training normalization
+    Ensure all REQUIRED_FEATURE_ORDER fields exist.
+    Uppercase strings, leave numeric values as-is, fill missing numeric with 0.
+    """
     normalized = {}
     for k in REQUIRED_FEATURE_ORDER:
-        v = feature_map.get(k, "")
-        if isinstance(v, str):
-            normalized[k] = v.upper().strip()
+        v = feature_map.get(k)
+        if v is None:
+            # Fill missing values
+            if k in ["Age at Enrollment", "Requirement Agreement", "Disability", "Indigenous"]:
+                normalized[k] = 0
+            else:
+                normalized[k] = ""
         else:
-            normalized[k] = v
+            # Only uppercase strings
+            normalized[k] = v.upper().strip() if isinstance(v, str) else v
+    return normalized
+
+def predict_student_rf(profile: Dict[str, Any]) -> Dict[str, Any]:
+    """Predict probability and class for a single student profile dict."""
+    model = _load_model()
+    normalized = normalize_features(profile)
 
     df = pd.DataFrame([[normalized[k] for k in REQUIRED_FEATURE_ORDER]], columns=REQUIRED_FEATURE_ORDER)
+    global _last_prediction_error
     try:
-        if hasattr(model, "predict_proba"):
-            proba = model.predict_proba(df)[0]
-            # Assume binary classification; positive class index 1
-            if len(proba) >= 2:
-                return float(proba[1])
-            return float(max(proba))
-        # No predict_proba: approximate from prediction
-        pred = model.predict(df)[0]
-        return 0.7 if int(pred) == 1 else 0.3
-    except Exception:
-        return 0.5
+        if model is not None:
+            pred = model.predict(df)[0]
+            proba = float(model.predict_proba(df)[0][1]) if hasattr(model, "predict_proba") else 0.7 if int(pred) == 1 else 0.3
+            return {"Prediction": int(pred), "Probability": proba}
+        else:
+            return {"Prediction": 0, "Probability": 0.5}  # fallback if model not loaded
+    except Exception as exc:
+        _last_prediction_error = exc
+        logger.exception("Prediction failed; returning fallback: %s", exc)
+        return {"Prediction": 0, "Probability": 0.5}
 
-def predict_enrollment_chance(features_json: str) -> Tuple[str, float]:
-    """Compatibility wrapper returning (label, probability)."""
+def compute_and_save_enrollment_chance(student: Student) -> float:
+    """
+    Compute enrollment probability for a single Django Student instance
+    and save it to the enrollment_chance column.
+    """
+    from .utils import build_flat_record  # your existing helper that flattens student data
     try:
-        feat = json.loads(features_json)
-    except Exception:
-        feat = {}
-    prob = predict_enrollment_probability(feat)
-    label = "Likely" if prob >= 0.5 else "Unlikely"
-    return label, prob
-
-# Backwards compatibility (if any old imports remain)
-def predict_enrollment(features: Any):
-    model = _load_model()
-    if model is None:
-        return 0
-    return model.predict([features])[0]
+        feature_map = build_flat_record(student)
+        normalized_features_map = normalize_features(feature_map)
+        pred_dict = predict_student_rf(normalized_features_map)
+        student.enrollment_chance = pred_dict["Probability"]
+        student.save(update_fields=["enrollment_chance"])
+        return pred_dict["Probability"]
+    except Exception as exc:
+        logger.exception("Failed to compute enrollment chance for student %s: %s", student.id, exc)
+        return student.enrollment_chance if student.enrollment_chance is not None else 0.5

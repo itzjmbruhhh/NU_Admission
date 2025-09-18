@@ -71,6 +71,13 @@ class Student(models.Model):
     def status(self):
         return "Enrolled" if self.student_id else "Not Enrolled"
 
+    @property
+    def enrollment_chance_display(self):
+        """Return formatted enrollment chance e.g. 'Enrollment chance: 72.35%'."""
+        if self.enrollment_chance is None:
+            return "Enrollment chance: N/A"
+        return f"Enrollment chance: {self.enrollment_chance * 100:.2f}%"
+
     def save(self, *args, **kwargs):
         """Automatically update status based on student_id if not manually set."""
         if not self.status:
