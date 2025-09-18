@@ -284,7 +284,11 @@
             <div class="form-grid">
               <!-- Present Address -->
               <div class="form-group full-width">
-                <label for="presentAddress" style="font-size: 1.2em; font-weight: bold;">Present Address *</label>
+                <label
+                  for="presentAddress"
+                  style="font-size: 1.2em; font-weight: bold"
+                  >Present Address *</label
+                >
                 <input
                   type="text"
                   id="presentAddress"
@@ -307,7 +311,7 @@
               <div class="form-group">
                 <label for="presentBarangay">Barangay *</label>
                 <select id="presentBarangay" name="presentBarangay" required>
-                 <option value="">Select Barangay</option>
+                  <option value="">Select Barangay</option>
                 </select>
               </div>
               <div class="form-group">
@@ -327,7 +331,10 @@
               </div>
               <!-- Permanent Address -->
               <div class="form-group full-width">
-                <label for="permanentAddress" style="font-size: 1.2em; font-weight: bold;">
+                <label
+                  for="permanentAddress"
+                  style="font-size: 1.2em; font-weight: bold"
+                >
                   Permanent Address *
                   <input type="checkbox" id="sameAsPresent" />
                   <small>Same as Present Address</small>
@@ -357,8 +364,12 @@
               </div>
               <div class="form-group">
                 <label for="permanentBarangay">Barangay *</label>
-                <select id="permanentBarangay" name="permanent Barangay" required>
-                 <option value="">Select Barangay</option>
+                <select
+                  id="permanentBarangay"
+                  name="permanent Barangay"
+                  required
+                >
+                  <option value="">Select Barangay</option>
                 </select>
               </div>
               <div class="form-group">
@@ -423,9 +434,9 @@
                 <label for="annualIncome">Annual Income *</label>
                 <select name="annualIncome" id="annualIncome" required>
                   <option value="">Select Income Range</option>
-                  <option value="below_20k">Less than 20,000</option>
-                  <option value="50k_100k">50,000 - 100,000</option>
-                  <option value="more_100k">More than 100,000</option>
+                  <option value="below_30k">Less than 30,000</option>
+                  <option value="30k_80k">30,000 - 80,000</option>
+                  <option value="more_80k">More than 80,000</option>
                 </select>
               </div>
             </div>
@@ -590,163 +601,179 @@
       });
 
       document.addEventListener("DOMContentLoaded", function () {
-  const provinceApi = "https://psgc.cloud/api/provinces";
+        const provinceApi = "https://psgc.cloud/api/provinces";
 
-  const presentProvince = document.getElementById("presentProvince");
-  const permanentProvince = document.getElementById("permanentProvince");
-  const presentCity = document.getElementById("presentCity");
-  const permanentCity = document.getElementById("permanentCity");
-  const presentBarangay = document.getElementById("presentBarangay");
-  const permanentBarangay = document.getElementById("permanentBarangay");
+        const presentProvince = document.getElementById("presentProvince");
+        const permanentProvince = document.getElementById("permanentProvince");
+        const presentCity = document.getElementById("presentCity");
+        const permanentCity = document.getElementById("permanentCity");
+        const presentBarangay = document.getElementById("presentBarangay");
+        const permanentBarangay = document.getElementById("permanentBarangay");
 
-  // load provinces into a select element
-  function loadProvinces(selectEl) {
-    return fetch(provinceApi)
-      .then(response => response.json())
-      .then(data => {
-        data.forEach(prov => {
-          const option = document.createElement("option");
-          option.value = prov.code;
-          option.textContent = prov.name;
-          selectEl.appendChild(option);
-        });
-      })
-      .catch(err => console.error("Failed to load provinces:", err));
-  }
-
-  // load cities for a provinceCode into a citySelect (returns Promise)
-  function loadCities(provinceCode, citySelect) {
-    citySelect.innerHTML = '<option value="">Select City</option>';
-    if (!provinceCode) return Promise.resolve();
-    return fetch(`https://psgc.cloud/api/provinces/${provinceCode}/cities-municipalities`)
-      .then(response => response.json())
-      .then(data => {
-        data.forEach(city => {
-          const option = document.createElement("option");
-          option.value = city.code;
-          option.textContent = city.name;
-          citySelect.appendChild(option);
-        });
-      })
-      .catch(err => console.error("Failed to load cities:", err));
-  }
-  // load barangays for a cityCode into a barangaySelect
-function loadBarangays(cityCode, barangaySelect) {
-  barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
-  if (!cityCode) return Promise.resolve();
-
-  return fetch(`https://psgc.cloud/api/cities-municipalities/${cityCode}/barangays`)
-    .then(response => response.json())
-    .then(data => {
-      data.forEach(brgy => {
-        const option = document.createElement("option");
-        option.value = brgy.code;
-        option.textContent = brgy.name;
-        barangaySelect.appendChild(option);
-      });
-    })
-    .catch(err => console.error("Failed to load barangays:", err));
-}
-
-  // populate both province selects
-  Promise.all([loadProvinces(presentProvince), loadProvinces(permanentProvince)])
-    .catch(() => { /* already logged */ });
-
-  // when province changes, load its cities
-  presentProvince.addEventListener("change", function () {
-    loadCities(this.value, presentCity);
-  });
-
-  permanentProvince.addEventListener("change", function () {
-    loadCities(this.value, permanentCity);
-  });
-    // when city changes, load its barangays
-  // when city changes, load barangays
-presentCity.addEventListener("change", function () {
-  loadBarangays(this.value, presentBarangay);
-});
-
-permanentCity.addEventListener("change", function () {
-  loadBarangays(this.value, permanentBarangay);
-});
-  
-
-  // Same-as-Present logic (copies address, province, city, barangay, zip)
-  const sameAsCheckbox = document.getElementById("sameAsPresent");
-
-  function copyPresentToPermanent() {
-  document.getElementById("permanentAddress").value = document.getElementById("presentAddress").value;
-  document.getElementById("permanentZip").value = document.getElementById("presentZip").value;
-
-  const presentProvVal = presentProvince.value;
-  const presentCityVal = presentCity.value;
-  const presentBrgyVal = document.getElementById("presentBarangay").value;
-
-  permanentProvince.value = presentProvVal;
-
-  if (presentProvVal) {
-    // load corresponding cities into permanentCity then set value
-    loadCities(presentProvVal, permanentCity)
-      .then(() => {
-        permanentCity.value = presentCityVal || "";
-
-        if (presentCityVal) {
-          // load barangays for this city and then select the same barangay
-          loadBarangays(presentCityVal, document.getElementById("permanentBarangay"))
-            .then(() => {
-              document.getElementById("permanentBarangay").value = presentBrgyVal || "";
-            });
+        // load provinces into a select element
+        function loadProvinces(selectEl) {
+          return fetch(provinceApi)
+            .then((response) => response.json())
+            .then((data) => {
+              data.forEach((prov) => {
+                const option = document.createElement("option");
+                option.value = prov.code;
+                option.textContent = prov.name;
+                selectEl.appendChild(option);
+              });
+            })
+            .catch((err) => console.error("Failed to load provinces:", err));
         }
+
+        // load cities for a provinceCode into a citySelect (returns Promise)
+        function loadCities(provinceCode, citySelect) {
+          citySelect.innerHTML = '<option value="">Select City</option>';
+          if (!provinceCode) return Promise.resolve();
+          return fetch(
+            `https://psgc.cloud/api/provinces/${provinceCode}/cities-municipalities`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              data.forEach((city) => {
+                const option = document.createElement("option");
+                option.value = city.code;
+                option.textContent = city.name;
+                citySelect.appendChild(option);
+              });
+            })
+            .catch((err) => console.error("Failed to load cities:", err));
+        }
+        // load barangays for a cityCode into a barangaySelect
+        function loadBarangays(cityCode, barangaySelect) {
+          barangaySelect.innerHTML =
+            '<option value="">Select Barangay</option>';
+          if (!cityCode) return Promise.resolve();
+
+          return fetch(
+            `https://psgc.cloud/api/cities-municipalities/${cityCode}/barangays`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              data.forEach((brgy) => {
+                const option = document.createElement("option");
+                option.value = brgy.code;
+                option.textContent = brgy.name;
+                barangaySelect.appendChild(option);
+              });
+            })
+            .catch((err) => console.error("Failed to load barangays:", err));
+        }
+
+        // populate both province selects
+        Promise.all([
+          loadProvinces(presentProvince),
+          loadProvinces(permanentProvince),
+        ]).catch(() => {
+          /* already logged */
+        });
+
+        // when province changes, load its cities
+        presentProvince.addEventListener("change", function () {
+          loadCities(this.value, presentCity);
+        });
+
+        permanentProvince.addEventListener("change", function () {
+          loadCities(this.value, permanentCity);
+        });
+        // when city changes, load its barangays
+        // when city changes, load barangays
+        presentCity.addEventListener("change", function () {
+          loadBarangays(this.value, presentBarangay);
+        });
+
+        permanentCity.addEventListener("change", function () {
+          loadBarangays(this.value, permanentBarangay);
+        });
+
+        // Same-as-Present logic (copies address, province, city, barangay, zip)
+        const sameAsCheckbox = document.getElementById("sameAsPresent");
+
+        function copyPresentToPermanent() {
+          document.getElementById("permanentAddress").value =
+            document.getElementById("presentAddress").value;
+          document.getElementById("permanentZip").value =
+            document.getElementById("presentZip").value;
+
+          const presentProvVal = presentProvince.value;
+          const presentCityVal = presentCity.value;
+          const presentBrgyVal =
+            document.getElementById("presentBarangay").value;
+
+          permanentProvince.value = presentProvVal;
+
+          if (presentProvVal) {
+            // load corresponding cities into permanentCity then set value
+            loadCities(presentProvVal, permanentCity).then(() => {
+              permanentCity.value = presentCityVal || "";
+
+              if (presentCityVal) {
+                // load barangays for this city and then select the same barangay
+                loadBarangays(
+                  presentCityVal,
+                  document.getElementById("permanentBarangay")
+                ).then(() => {
+                  document.getElementById("permanentBarangay").value =
+                    presentBrgyVal || "";
+                });
+              }
+            });
+          } else {
+            permanentCity.innerHTML = '<option value="">Select City</option>';
+            permanentCity.value = "";
+            document.getElementById("permanentBarangay").innerHTML =
+              '<option value="">Select Barangay</option>';
+          }
+        }
+
+        function clearPermanentFields() {
+          document.getElementById("permanentAddress").value = "";
+          document.getElementById("permanentZip").value = "";
+          permanentProvince.value = "";
+          permanentCity.innerHTML = '<option value="">Select City</option>';
+          document.getElementById("permanentBarangay").innerHTML =
+            '<option value="">Select Barangay</option>';
+        }
+        document
+          .getElementById("presentBarangay")
+          .addEventListener("change", () => {
+            if (sameAsCheckbox.checked) copyPresentToPermanent();
+          });
+
+        sameAsCheckbox.addEventListener("change", function () {
+          if (this.checked) {
+            copyPresentToPermanent();
+          } else {
+            clearPermanentFields();
+          }
+        });
+
+        // Keep permanent synced while checkbox is checked
+        ["presentAddress", "presentZip"].forEach((id) => {
+          document.getElementById(id).addEventListener("input", () => {
+            if (sameAsCheckbox.checked) copyPresentToPermanent();
+          });
+        });
+
+        // If present province or city changes, update permanent copy if checked
+        presentProvince.addEventListener("change", () => {
+          if (sameAsCheckbox.checked) copyPresentToPermanent();
+        });
+        presentCity.addEventListener("change", () => {
+          if (sameAsCheckbox.checked) copyPresentToPermanent();
+        });
       });
-  } else {
-    permanentCity.innerHTML = '<option value="">Select City</option>';
-    permanentCity.value = "";
-    document.getElementById("permanentBarangay").innerHTML = '<option value="">Select Barangay</option>';
-  }
-}
-
-  function clearPermanentFields() {
-  document.getElementById("permanentAddress").value = "";
-  document.getElementById("permanentZip").value = "";
-  permanentProvince.value = "";
-  permanentCity.innerHTML = '<option value="">Select City</option>';
-  document.getElementById("permanentBarangay").innerHTML = '<option value="">Select Barangay</option>';
-}
-  document.getElementById("presentBarangay").addEventListener("change", () => {
-  if (sameAsCheckbox.checked) copyPresentToPermanent();
-});
-
-  sameAsCheckbox.addEventListener("change", function () {
-    if (this.checked) {
-      copyPresentToPermanent();
-    } else {
-      clearPermanentFields();
-    }
-  });
-
-  // Keep permanent synced while checkbox is checked
-  ["presentAddress", "presentZip"].forEach(id => {
-    document.getElementById(id).addEventListener("input", () => {
-      if (sameAsCheckbox.checked) copyPresentToPermanent();
-    });
-  });
-
-  // If present province or city changes, update permanent copy if checked
-  presentProvince.addEventListener("change", () => {
-    if (sameAsCheckbox.checked) copyPresentToPermanent();
-  });
-  presentCity.addEventListener("change", () => {
-    if (sameAsCheckbox.checked) copyPresentToPermanent();
-  });
-});
-    // Restrict Zip Code inputs to numbers only
-    ["presentZip", "permanentZip"].forEach(id => {
-      const zipInput = document.getElementById(id);
-      zipInput.addEventListener("input", function () {
-        this.value = this.value.replace(/\D/g, ""); // remove non-digits
-    });
- });
-
+      // Restrict Zip Code inputs to numbers only
+      ["presentZip", "permanentZip"].forEach((id) => {
+        const zipInput = document.getElementById(id);
+        zipInput.addEventListener("input", function () {
+          this.value = this.value.replace(/\D/g, ""); // remove non-digits
+        });
+      });
     </script>
   </body>
 </html>
