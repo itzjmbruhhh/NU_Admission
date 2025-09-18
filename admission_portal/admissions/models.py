@@ -64,6 +64,8 @@ class Student(models.Model):
     # Additional Fields
     annual_income = models.CharField(max_length=50, blank=True, null=True)
     enrollment_chance = models.FloatField(blank=True, null=True)
+    # Computed once at registration time
+    age_at_enrollment = models.IntegerField(blank=True, null=True)
     
     @property
     def status(self):
