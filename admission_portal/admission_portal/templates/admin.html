@@ -218,9 +218,11 @@
                       >
                     </td>
                     <td>
-                      <span class="chance-badge high"
-                        >{{ student.enrollment_chance }}</span
-                      >
+                      {% if student.enrollment_chance %}
+                        <span class="chance-badge high">{{ student.enrollment_chance }}</span>
+                      {% else %}
+                        <span class="chance-badge" style="background:#ccc;color:#222;">N/A</span>
+                      {% endif %}
                     </td>
                     <td>
                       {% if student.status == 'Enrolled' %}

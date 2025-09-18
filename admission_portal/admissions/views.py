@@ -151,28 +151,9 @@ def adminDash(request):
 
 def register_student(request):
     if request.method == "POST":
-        import json
-        import tempfile
-        from .ml_utils import predict_enrollment_chance
-
+        from datetime import date
         form = request.POST
-        # --- Feature extraction ---
-        from datetime import date, datetime
         school_term = form.get("schoolTerm")
-        # Derive age at enrollment from birthDate if available
-        birth_date_raw = form.get("birthDate")
-        age_at_enrollment = ""
-        if birth_date_raw:
-            try:
-                bd = datetime.strptime(birth_date_raw, "%Y-%m-%d").date()
-                today = date.today()
-                age = today.year - bd.year - ((today.month, today.day) < (bd.month, bd.day))
-                age_at_enrollment = age
-            except Exception:
-                age_at_enrollment = ""
-        requirement_agreement = "Yes" if form.get("truthfulInfo") else "No"
-        disability = form.get("disability", "").strip()
-        indigenous = form.get("indigenous", "").strip()
         program_first_choice = form.get("firstChoice", "")
         program_second_choice = form.get("secondChoice", "")
         entry_level = form.get("entryLevel", "")
@@ -194,43 +175,11 @@ def register_student(request):
         birth_country = form.get("birthCountry", "")
         student_type = form.get("studentType", "")
         school_type = form.get("schoolType", "")
+        requirement_agreement_bin = 1 if form.get("truthfulInfo") else 0
+        disability_bin = 1 if form.get("disability", "").strip() else 0
+        indigenous_bin = 1 if form.get("indigenous", "").strip() else 0
 
-        def bin_convert(val):
-            v = str(val).strip().lower()
-            if v in {"yes","y","1","true","t"}: return 1
-            return 0
-        requirement_agreement_bin = bin_convert(requirement_agreement)
-        disability_bin = 0 if disability == "" else 1  # treat presence of any text as 1
-        indigenous_bin = 0 if indigenous == "" else 1  # treat selection of any group as 1
-
-        def cap(val):
-            return str(val).strip().upper()
-        cat_fields = [program_first_choice, program_second_choice, entry_level, birth_city, birth_province, gender,
-                      citizen_of, religion, civil_status, current_region, current_province, current_city, current_brgy,
-                      permanent_country, permanent_region, permanent_province, permanent_city, permanent_brgy,
-                      birth_country, student_type, school_type]
-        cat_fields_cap = [cap(f) for f in cat_fields]
-
-        feature_names = [
-            "School Term", "Age at Enrollment", "Requirement Agreement", "Disability", "Indigenous",
-            "Program (First Choice)", "Program (Second Choice)", "Entry Level", "Birth City", "Place of Birth (Province)",
-            "Gender", "Citizen of", "Religion", "Civil Status", "Current Region", "Current Province", "City/Municipality",
-            "Current Brgy.", "Permanent Country", "Permanent Region", "Permanent Province", "Permanent City", "Permanent Brgy.",
-            "Birth Country", "Student Type", "School Type"
-        ]
-        feature_values = [school_term, age_at_enrollment, requirement_agreement_bin, disability_bin, indigenous_bin] + cat_fields_cap
-        features = dict(zip(feature_names, feature_values))
-
-        # --- Create temporary JSON file ---
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp_json:
-            json.dump(features, tmp_json)
-            tmp_json_path = tmp_json.name
-
-        # --- Predict ---
-        features_json = json.dumps(features)
-        pred_label, pred_prob = predict_enrollment_chance(features_json)
-
-        # --- Save to DB ---
+        # --- Save to DB (prediction removed) ---
         student = Student.objects.create(
             school_year=form.get("schoolYear"),
             school_term=school_term,
@@ -273,14 +222,10 @@ def register_student(request):
             disability=disability_bin,
             indigenous=indigenous_bin,
             annual_income=form.get("annualIncome"),
-            enrollment_chance=pred_prob
+            enrollment_chance=None
         )
         student.save()
-        # Render a result page with prediction
-        return render(request, "registration_result.html", {
-            "student": student,
-            "pred_label": pred_label,
-            "pred_prob": pred_prob
-        })
+        # Render simple confirmation page (prediction removed)
+        return render(request, "registration_result.html", {"student": student})
 
     return render(request, "registration.html")
