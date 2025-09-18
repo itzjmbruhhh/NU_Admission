@@ -9,6 +9,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .models  import Student
+from .utils import write_feature_json
+from .ml_utils import compute_and_save_enrollment_chance
 
 
 def index(request):
@@ -43,8 +45,10 @@ def adminDash(request):
     program = request.GET.get('program')
     school_year = request.GET.get('school_year')
     status = request.GET.get('status')
+    enroll_chance = request.GET.get('enroll_chance')
 
-    students = Student.objects.all().order_by('-school_year', '-school_term')
+    # Order by latest registration (most recent first)
+    students = Student.objects.all().order_by('-id')
     if program:
         students = students.filter(program_first_choice=program)
     if school_year:
@@ -55,6 +59,16 @@ def adminDash(request):
         students = students.filter(student_id__isnull=True) | students.filter(student_id__exact='')
     if student_id:
         students = students.filter(student_id__icontains=student_id)
+
+    # Enrollment chance threshold filters (now stored as percentage 0..100)
+    if enroll_chance == 'lt_40':
+        students = students.filter(enrollment_chance__lt=40)
+    elif enroll_chance == 'gte_40':
+        students = students.filter(enrollment_chance__gte=40)
+    elif enroll_chance == 'gte_70':
+        students = students.filter(enrollment_chance__gte=70)
+    elif enroll_chance == 'gte_90':
+        students = students.filter(enrollment_chance__gte=90)
 
     # Pagination
     paginator = Paginator(students, 10)
@@ -128,6 +142,7 @@ def adminDash(request):
         'selected_program': program,
         'selected_status': status,
         'selected_school_year': school_year,
+    'selected_enroll_chance': enroll_chance,
         'current_enrolled_count': current_enrolled_count,
         'current_year': current_year,
         'current_term': current_term,
@@ -147,66 +162,159 @@ def adminDash(request):
     }
     return render(request, 'admin.html', context)
 
-def register(request):
-    return render(request, 'registration.html')
 
 def register_student(request):
     if request.method == "POST":
-        # Grab form data by name attributes
-        school_year = request.POST.get("schoolYear")
-        school_term = request.POST.get("schoolTerm")
-        campus = request.POST.get("campus")
-        first_choice = request.POST.get("firstChoice")
-        second_choice = request.POST.get("secondChoice")
-        student_type = request.POST.get("studentType")
-        first_name = request.POST.get("firstName")
-        last_name = request.POST.get("lastName")
-        middle_name = request.POST.get("middleName")
-        suffix = request.POST.get("suffix")
-        gender = request.POST.get("gender")
-        civil_status = request.POST.get("civilStatus")
-        birth_date = request.POST.get("birthDate")
-        birth_place = request.POST.get("birthPlace")
-        nationality = request.POST.get("nationality")
-        religion = request.POST.get("religion")
-        present_address = request.POST.get("presentAddress")
-        city_province = request.POST.get("cityProvince")
-        zip_code = request.POST.get("zipCode")
-        mobile_number = request.POST.get("mobileNumber")
-        email = request.POST.get("emailAddress")
-        father_name = request.POST.get("fatherName")
-        father_occupation = request.POST.get("fatherOccupation")
-        mother_name = request.POST.get("motherName")
-        mother_occupation = request.POST.get("motherOccupation")
-        guardian_contact = request.POST.get("guardianContact")
-        truthful_info = request.POST.get("truthfulInfo")
-        data_privacy = request.POST.get("dataPrivacy")
+        from datetime import date
+        form = request.POST
+        school_term = form.get("schoolTerm")
+        program_first_choice = form.get("firstChoice", "")
+        program_second_choice = form.get("secondChoice", "")
+        entry_level = form.get("entryLevel", "")
+        birth_city = form.get("birthCity", "")
+        birth_province = form.get("birthProvince", "")
+        gender = form.get("gender", "")
+        citizen_of = form.get("nationality", "")
+        religion = form.get("religion", "")
+        civil_status = form.get("civilStatus", "")
+        current_region = form.get("currentRegion", "") or ""
+        current_province = form.get("presentProvince", "")
+        current_city = form.get("presentCity", "")
+        current_brgy = form.get("presentBarangay", "")
+        permanent_country = form.get("permanentCountry", "")
+        permanent_region = form.get("permanentRegion", "") or ""
+        permanent_province = form.get("permanentProvince", "")
+        permanent_city = form.get("permanentCity", "")
+        permanent_brgy = form.get("permanentBarangay", "")
 
-        # Save to DB (adjust field names according to your Student model)
+        # Fallback: if permanent address fields empty, copy from current
+        if not permanent_region:
+            permanent_region = current_region
+        if not permanent_province:
+            permanent_province = current_province
+        if not permanent_city:
+            permanent_city = current_city
+        if not permanent_brgy:
+            permanent_brgy = current_brgy
+        birth_country = form.get("birthCountry", "")
+        student_type = form.get("studentType", "")
+        school_type = form.get("schoolType", "")
+        requirement_agreement_bin = 1 if form.get("truthfulInfo") else 0
+        disability_bin = 1 if form.get("disability", "").strip() else 0
+        indigenous_bin = 1 if form.get("indigenous", "").strip() else 0
+
+        # --- Save to DB (prediction removed) ---
+        # Compute age at enrollment
+        birth_date_str = form.get("birthDate")
+        age_at_enrollment = None
+        if birth_date_str:
+            try:
+                year, month, day = map(int, birth_date_str.split('-'))
+                bdt = date(year, month, day)
+                today = date.today()
+                age_at_enrollment = today.year - bdt.year - ((today.month, today.day) < (bdt.month, bdt.day))
+            except Exception:
+                age_at_enrollment = None
+
+        school_year_val = form.get("schoolYear")
+        # Extract the latest year from a range like "2024-2025" (store "2025")
+        derived_recent_year = None
+        if school_year_val:
+            try:
+                parts = str(school_year_val).split('-')
+                if len(parts) >= 2:
+                    derived_recent_year = int(parts[-1])
+                else:
+                    derived_recent_year = int(parts[0])
+            except Exception:
+                derived_recent_year = None
+
         student = Student.objects.create(
-            school_year=school_year,
+            # Store only the latest year (e.g., 2025) in school_year
+            school_year=str(derived_recent_year) if derived_recent_year is not None else school_year_val,
+            # Keep the submitted term (1st/2nd/3rd)
             school_term=school_term,
-            campus_code=campus,
-            program_first_choice=first_choice,
-            program_second_choice=second_choice,
-            student_type=student_type,
-            # add other fields here...
-            email=email,
-            mobile_number=mobile_number,
-            religion=religion,
+            campus_code=form.get("campus"),
+            program_first_choice=program_first_choice,
+            program_second_choice=program_second_choice,
+            entry_level=entry_level,
+            full_name=f"{form.get('lastName','').upper()}, {form.get('firstName','').upper()} {form.get('middleName','').upper()}".strip(),
+            first_name=form.get("firstName"),
+            middle_name=form.get("middleName"),
+            last_name=form.get("lastName"),
+            suffix=form.get("suffix"),
             gender=gender,
             civil_status=civil_status,
-            birth_date=birth_date,
-            birth_place=birth_place,
-            citizen_of=nationality,
-            complete_present_address=present_address,
-            current_city=city_province,
-            current_postal_code=zip_code,
-            last_school_attended="",  # optional for now
-            requirement_agreement=True if truthful_info and data_privacy else False,
-            enrolled=""
+            birth_date=form.get("birthDate"),
+            # Form doesn't have distinct birthPlace text input; use province label as birth_place
+            birth_place=birth_province,
+            birth_city=birth_city,
+            birth_province=birth_province,
+            birth_country=birth_country,
+            citizen_of=citizen_of,
+            religion=religion,
+            complete_present_address=form.get("presentAddress"),
+            current_street=form.get("presentAddress"),
+            current_region=current_region,
+            current_province=current_province,
+            current_city=current_city,
+            current_brgy=current_brgy,
+            current_postal_code=form.get("presentZip"),
+            permanent_country=permanent_country,
+            permanent_region=permanent_region,
+            permanent_province=permanent_province,
+            permanent_city=permanent_city,
+            permanent_brgy=permanent_brgy,
+            permanent_street=form.get("permanentAddress") or form.get("presentAddress"),
+            permanent_postal_code=form.get("permanentZip"),
+            email=form.get("emailAddress"),
+            mobile_number=form.get("mobileNumber"),
+            student_type=student_type,
+            school_type=school_type,
+            last_school_attended=form.get("lastSchoolAttended", ""),
+            requirement_agreement=requirement_agreement_bin,
+            disability=disability_bin,
+            indigenous=indigenous_bin,
+            annual_income=form.get("annualIncome"),
+            enrollment_chance=None,
+            age_at_enrollment=age_at_enrollment
         )
         student.save()
-        return redirect("index")  # redirect to homepage after success
+        # After saving, compute probability (model inference) and export feature JSON (best-effort)
+        # Note: compute_and_save_enrollment_chance() persists the probability to student.enrollment_chance
+        try:
+            probability = compute_and_save_enrollment_chance(student)
+        except Exception:
+            probability = None
+        try:
+            feature_path = write_feature_json(student)
+        except Exception:
+            feature_path = None
+        # Instead of showing a separate results page, return to the registration
+        # screen with a success/loading modal and a button to go to Home.
+        # Keep context minimal; UI does not display model details now.
+        return render(
+            request,
+            "registration.html",
+            {
+                "submission_success": True,
+            },
+        )
 
     return render(request, "registration.html")
+
+# Optional future improvement:
+# Instead of calling compute_and_save_enrollment_chance inside the view, you can
+# move this logic to a Django post_save signal for Student so every creation (or
+# update meeting certain criteria) automatically refreshes the enrollment_chance.
+# Example skeleton (place in signals.py and import in apps.py ready()):
+#
+# from django.db.models.signals import post_save
+# from django.dispatch import receiver
+# from .models import Student
+# from .ml_utils import compute_and_save_enrollment_chance
+#
+# @receiver(post_save, sender=Student)
+# def update_enrollment_chance(sender, instance, created, **kwargs):
+#     if created and instance.enrollment_chance is None:
+#         compute_and_save_enrollment_chance(instance)
