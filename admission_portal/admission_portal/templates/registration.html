@@ -266,6 +266,15 @@
                 <label for="disability">Disability *</label>
                 <input type="text" id="disability" name="disability" required />
               </div>
+              <div class="form-group">
+                <label for="emailAddress">Email Address *</label>
+                <input
+                  type="email"
+                  id="emailAddress"
+                  name="emailAddress"
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -275,7 +284,7 @@
             <div class="form-grid">
               <!-- Present Address -->
               <div class="form-group full-width">
-                <label for="presentAddress">Present Address *</label>
+                <label for="presentAddress" style="font-size: 1.2em; font-weight: bold;">Present Address *</label>
                 <input
                   type="text"
                   id="presentAddress"
@@ -310,19 +319,9 @@
                   required
                 />
               </div>
-              <div class="form-group">
-                <label for="emailAddress">Email Address *</label>
-                <input
-                  type="email"
-                  id="emailAddress"
-                  name="emailAddress"
-                  required
-                />
-              </div>
-
               <!-- Permanent Address -->
               <div class="form-group full-width">
-                <label for="permanentAddress">
+                <label for="permanentAddress" style="font-size: 1.2em; font-weight: bold;">
                   Permanent Address *
                   <input type="checkbox" id="sameAsPresent" />
                   <small>Same as Present Address</small>
@@ -407,15 +406,15 @@
                   required
                 />
               </div>
+
               <div class="form-group">
                 <label for="annualIncome">Annual Income *</label>
-                <input
-                  type="text"
-                  id="annualIncome"
-                  name="annualIncome"
-                  placeholder="(e.g., 50,000 or 100,000)"
-                  required
-                />
+                <select name="annualIncome" id="annualIncome" required>
+                  <option value="">Select Income Range</option>
+                  <option value="below_20k">Less than 20,000</option>
+                  <option value="50k_100k">50,000 - 100,000</option>
+                  <option value="more_100k">More than 100,000</option>
+                </select>
               </div>
             </div>
           </div>
@@ -683,7 +682,13 @@
     if (sameAsCheckbox.checked) copyPresentToPermanent();
   });
 });
-
+    // Restrict Zip Code inputs to numbers only
+    ["presentZip", "permanentZip"].forEach(id => {
+      const zipInput = document.getElementById(id);
+      zipInput.addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, ""); // remove non-digits
+    });
+ });
 
     </script>
   </body>
