@@ -84,7 +84,7 @@ URL Path                  | View Function      | Template / Notes
 - `templates/` → HTML templates for index, registration, login, and admin views.
 - `static/` → CSS, JS, images, and other static assets.
 - `requirements.txt` → Python dependencies (Django, django-import-export, etc.)
-
+test
 ---
 
 ## **Tips / Notes**
