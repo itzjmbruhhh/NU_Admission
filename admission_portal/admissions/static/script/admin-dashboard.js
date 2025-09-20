@@ -88,9 +88,9 @@ document.addEventListener("DOMContentLoaded", function () {
       "Bachelor of Science in Civil Engineering": "BSCE",
       "Bachelor of Science in Architecture": "BSARCH",
       "Bachelor of Science in Tourism Management": "BSTM",
-      "Bachelor of Science in Business Administration major in Marketing Management":
+      "Bachelor of Science in Business Administration Major in Marketing Management":
         "BSBA-MktgMgt",
-      "Bachelor of Science in Business Administration major in Financial Management":
+      "Bachelor of Science in Business Administration Major in Financial Management":
         "BSBA-FinMgt",
       "Bachelor of Science in Accountancy": "BSA",
     };
