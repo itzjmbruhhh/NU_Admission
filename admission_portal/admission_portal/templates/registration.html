@@ -54,7 +54,7 @@
       <div class="form-container">
         <h2 class="form-title">Student Registration Form</h2>
 
-        <form id="registrationForm" method="POST" action="{% url 'register' %}">
+        <form id="registrationForm" method="POST" action="{% url 'register' %}?{% now 'U' %}">
           {% csrf_token %}
           <div class="form-stack">
             <!-- Admission Section -->
@@ -165,7 +165,7 @@
                         Marketing Management
                       </option>
                       <option value="BS Tourism">
-                        Bachelor of Science in Tourism
+                        Bachelor of Science in Tourism Management
                       </option>
                     </optgroup>
                     <optgroup
@@ -181,8 +181,7 @@
                         Bachelor of Science in Computer Science
                       </option>
                       <option value="BS Information Technology">
-                        Bachelor of Science in Information Technology with
-                        specilization in Mobile and Web Applications
+                        Bachelor of Science in Information Technology
                       </option>
                     </optgroup>
                     <optgroup

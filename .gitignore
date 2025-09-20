@@ -12,6 +12,7 @@ venv/
 .venv/
 .env/
 *.env
+.vscode
 
 *.pkl
 

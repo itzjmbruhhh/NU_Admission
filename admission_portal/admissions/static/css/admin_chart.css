@@ -574,8 +574,14 @@
 
 .program-badge.bscs { background: #dbeafe; color: var(--primary); }
 .program-badge.bsit { background: #d1fae5; color: var(--success); }
-.program-badge.nursing { background: #fef3c7; color: var(--warning); }
+.program-badge.nursing { background: #eea5f8; color: 2d2e3a; }
 .program-badge.business { background: #e0e7ff; color: #6366f1; }
+.program-badge.psy { background: #e9e64a; color: #2d2e3a; }
+.program-badge.mt { background: #37bb48; color: #2d2e3a; }
+.program-badge.ce { background: #d4431f; color: #ffffff; }
+.program-badge.arch { background: #441eee; color: #ffffff; }
+.program-badge.tm { background: #6a696b; color: #ffffff; }
+.program-badge.acc { background: #f5dd03; color: #2d2e3a; }
 
 .chance-badge {
   padding: 4px 12px;
