@@ -9,7 +9,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="{% static 'css/admin_chart.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/admin_chart.css' %}?{% now 'U' %}" />
   </head>
   <body>
     <div class="admin-page">
@@ -223,9 +223,31 @@
                     <td>{{ student.student_id }}</td>
                     <td>{{ student.name }}</td>
                     <td>
-                      <span class="program-badge bscs"
-                        >{{ student.program_first_choice }}</span
-                      >
+                      {% if student.program_first_choice == 'Bachelor of Science in Psychology' %}
+                        <span class="program-badge psy">BPSY</span>
+                      {% elif student.program_first_choice == 'Bachelor of Science in Nursing' %}
+                        <span class="program-badge nursing">BSN</span>
+                      {% elif student.program_first_choice == 'Bachelor of Science in Medical Technology' %}
+                        <span class="program-badge mt">BSMT</span>
+                      {% elif student.program_first_choice == 'Bachelor of Science in Information Technology' %}
+                        <span class="program-badge bsit">BSIT</span>
+                      {% elif student.program_first_choice == 'Bachelor of Science in Computer Science' %}
+                        <span class="program-badge bscs">BSCS</span>
+                      {% elif student.program_first_choice == 'Bachelor of Science in Civil Engineering' %}
+                        <span class="program-badge ce">BSCE</span>
+                      {% elif student.program_first_choice == 'Bachelor of Science in Architecture' %}
+                        <span class="program-badge arch">BSARCH</span>
+                      {% elif student.program_first_choice == 'Bachelor of Science in Tourism Management' %}
+                        <span class="program-badge tm">BSTM</span>
+                      {% elif student.program_first_choice == 'Bachelor of Science in Business Administration major in Marketing Management' %}
+                        <span class="program-badge business">BSBA-MktgMgt</span>
+                      {% elif student.program_first_choice == 'Bachelor of Science in Business Administration major in Financial Management' %}
+                        <span class="program-badge business">BSBA-FinMgt</span>
+                      {% elif student.program_first_choice == 'Bachelor of Science in Accountancy' %}
+                        <span class="program-badge acc">BSA</span>
+                      {% else %}
+                        <span class="program-badge">{{ student.program_first_choice }}</span>
+                      {% endif %}
                     </td>
                     <td>
                       {% if student.enrollment_chance is not None %}
@@ -302,7 +324,25 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="{% static 'script/admin-dashboard.js' %}"></script>
     <script>
+      function getProgramAbbreviation(name) {
+        const map = {
+          "Bachelor of Science in Psychology": "BPSY",
+          "Bachelor of Science in Nursing": "BSN",
+          "Bachelor of Science in Medical Technology": "BSMT",
+          "Bachelor of Science in Information Technology": "BSIT",
+          "Bachelor of Science in Information Technology with specilization in Mobile and Web Applications": "BSIT",
+          "Bachelor of Science in Computer Science": "BSCS",
+          "Bachelor of Science in Civil Engineering": "BSCE",
+          "Bachelor of Science in Architecture": "BSARCH",
+          "Bachelor of Science in Tourism Management": "BSTM",
+          "Bachelor of Science in Business Administration major in Marketing Management": "BSBA-MktgMgt",
+          "Bachelor of Science in Business Administration major in Financial Management": "BSBA-FinMgt",
+          "Bachelor of Science in Accountancy": "BSA"
+        };
+        return map[name] || name;
+      }
       document.addEventListener('DOMContentLoaded', function () {
+        // Section tab activation
         if (
           window.location.pathname.includes('adminDash') ||
           window.location.search.match(/(program=|status=|school_year=|student_id=|page=)/)
@@ -310,6 +350,11 @@
           if (typeof showSection === 'function') {
             showSection('search');
           }
+        }
+        // Convert top program to abbreviation
+        var topProgramElem = document.querySelector('.summary-card.info .card-content h2');
+        if (topProgramElem) {
+          topProgramElem.textContent = getProgramAbbreviation(topProgramElem.textContent.trim());
         }
       });
     </script>
