@@ -7,6 +7,7 @@ A Django-based student admission system for NU Lipa, allowing student registrati
 ## **Setup Instructions**
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/itzjmbruhhh/NU_Admission.git
 cd NU_Admission/dmission_portal
@@ -15,6 +16,7 @@ cd NU_Admission/dmission_portal
 ---
 
 ### 2. Create a Virtual Environment
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate   # Linux/macOS
@@ -24,6 +26,7 @@ venv\Scripts\activate      # Windows
 ---
 
 ### 3. Install Dependencies
+
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
@@ -32,6 +35,7 @@ pip install -r requirements.txt
 ---
 
 ### 4. Apply Migrations
+
 ```bash
 python manage.py makemigrations
 python manage.py migrate
@@ -40,31 +44,33 @@ python manage.py migrate
 ---
 
 ### 5. Create Superuser (Admin)
+
 ```bash
 python manage.py createsuperuser
 ```
+
 Follow the prompts to create your admin account.
 
 ---
 
 ### 6. Run the Development Server
+
 ```bash
 python manage.py runserver
 ```
 
 - Open your browser at `http://127.0.0.1:8000/` for the homepage.
 
-Django URL Patterns
--------------------
+## Django URL Patterns
 
-URL Path                  | View Function      | Template / Notes
---------------------------|------------------|-----------------------------
-''                        | index             | templates/index.html
-'register/'               | register          | templates/registration.html
-'loginAdmin/'             | loginAdmin        | templates/login.html
-'adminDash/'              | adminDash         | templates/admin.html / dashboard
-'student/<int:pk>/'      | student_detail    | templates/student_detail.html
-'super_admin/'            | admin.site.urls   | Django Admin Panel
+| URL Path            | View Function   | Template / Notes                 |
+| ------------------- | --------------- | -------------------------------- |
+| ''                  | index           | templates/index.html             |
+| 'register/'         | register        | templates/registration.html      |
+| 'loginAdmin/'       | loginAdmin      | templates/login.html             |
+| 'adminDash/'        | adminDash       | templates/admin.html / dashboard |
+| 'student/<int:pk>/' | student_detail  | templates/student_detail.html    |
+| 'super_admin/'      | admin.site.urls | Django Admin Panel               |
 
 ---
 
@@ -92,3 +98,73 @@ test
 - Static files are served via `{% static %}` in templates. Make sure `STATICFILES_DIRS` and `STATIC_URL` are configured in `settings.py`.
 - To reset the database, you can delete `db.sqlite3` and re-run migrations.
 - For production deployment, configure `ALLOWED_HOSTS`, database settings, and static files properly.
+
+---
+
+## Feature Export for Model Prediction
+
+After a student successfully registers (`register_student` view), the system now writes a JSON file containing the latest registrant's features required by the ML model.
+
+Location:
+`admissions/data/latest_registration_features.json`
+
+Structure:
+
+```
+{
+  "numeric_features": {
+    "School Term": 1,
+    "Age at Enrollment": 18,
+    "Requirement Agreement": 1,
+    "Disability": 0,
+    "Indigenous": 0
+  },
+  "categorical_features": {
+    "Program (First Choice)": "BS Computer Science",
+    "Program (Second Choice)": "BS Information Technology",
+    "Entry Level": "Freshman",
+    "Birth City": "Lipa City",
+    "Place of Birth (Province)": "Batangas",
+    "Gender": "Male",
+    "Citizen of": "Philippines",
+    "Religion": "Catholic",
+    "Civil Status": "Single",
+    "Current Region": "Region IV-A",
+    "Current Province": "Batangas",
+    "City/Municipality": "Lipa City",
+    "Current Brgy.": "Poblacion",
+    "Permanent Country": "Philippines",
+    "Permanent Region": "Region IV-A",
+    "Permanent Province": "Batangas",
+    "Permanent City": "Lipa City",
+    "Permanent Brgy.": "Poblacion",
+    "Birth Country": "Philippines",
+    "Student Type": "New",
+    "School Type": "Public"
+  },
+  "student_pk": 42
+}
+```
+
+Usage Example (for a prediction script):
+
+```python
+import json, pathlib
+feature_path = pathlib.Path('admissions/data/latest_registration_features.json')
+features = json.loads(feature_path.read_text())
+# Combine or transform as needed for the model
+# e.g., X = transform(features['numeric_features'] | features['categorical_features'])
+```
+
+Implementation Details:
+
+- Logic lives in `admissions/utils.py` (`write_feature_json`, `build_feature_payload`).
+- Called in `admissions/views.py` immediately after `Student` instance is saved.
+- Age at Enrollment is computed from `birth_date` if available; else `null`.
+- Boolean / binary style fields (`requirement_agreement`, `disability`, `indigenous`) are coerced to integers when possible.
+
+Next Steps (Optional):
+
+- Hook this JSON into a prediction endpoint that loads `rf_model.pkl`.
+- Append historical feature rows (instead of overwriting) for batch training datasets.
+- Add input validation & fallback defaults for missing categorical values.
