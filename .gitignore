@@ -1,0 +1,13 @@
+ZIP
+*.sqlite3
+
+# Byte-compiled files
+*.pyc
+*.pyo
+__pycache__/
+
+# Virtual environments
+venv/
+.venv/
+.env/
+*.env
