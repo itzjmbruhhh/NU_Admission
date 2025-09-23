@@ -54,7 +54,11 @@
       <div class="form-container">
         <h2 class="form-title">Student Registration Form</h2>
 
-        <form id="registrationForm" method="POST" action="{% url 'register' %}?{% now 'U' %}">
+        <form
+          id="registrationForm"
+          method="POST"
+          action="{% url 'register' %}?{% now 'U' %}"
+        >
           {% csrf_token %}
           <div class="form-stack">
             <!-- Admission Section -->
@@ -657,6 +661,82 @@
               >Go to Home</a
             >
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Program Offerings Modal Overlay ===== -->
+    <div id="modalOverlay" class="modal-overlay">
+      <div class="modalbox">
+        <button class="close-btn" onclick="closeModal()">✖</button>
+
+        <!-- NU Header -->
+        <div class="modalbox-header">
+          <div class="header-left">
+            <img
+              src="{% static 'img/Nulogo.webp' %}"
+              alt="NU Logo"
+              class="nu-logo"
+            />
+            <span class="nu-text">NU LIPA</span>
+          </div>
+          <div class="header-right">
+            <span class="tagline">Education that works.</span>
+          </div>
+        </div>
+
+        <!-- Poster Title Section -->
+        <div class="poster-title">
+          <h1>ENROLLMENT ONGOING!</h1>
+          <h2>PROGRAM OFFERINGS</h2>
+        </div>
+
+        <!-- ===== Program Sections ===== -->
+        <div class="program-section">
+          <h3>Senior High School</h3>
+          <ul>
+            <li>Accountancy, Business and Management (ABM)</li>
+            <li>Humanities, and Social Sciences (HUMSS)</li>
+            <li>Science, Technology, Engineering and Mathematics (STEM)</li>
+          </ul>
+        </div>
+
+        <div class="program-section">
+          <h3>School of Allied Health and Sciences (SAHS)</h3>
+          <ul>
+            <li>BS Medical Technology</li>
+            <li>BS Psychology</li>
+            <li>BS Nursing</li>
+          </ul>
+        </div>
+
+        <div class="program-section">
+          <h3>School of Accountancy, Business, and Management (SABM)</h3>
+          <ul>
+            <li>BS Accountancy</li>
+            <li>BSBA Major in Financial Management</li>
+            <li>BSBA Major in Marketing Management</li>
+            <li>BS Tourism Management</li>
+          </ul>
+        </div>
+
+        <div class="program-section">
+          <h3>School of Architecture, Computing, and Engineering (SACE)</h3>
+          <ul>
+            <li>BS Civil Engineering</li>
+            <li>BS Computer Science (Machine Learning)</li>
+            <li>BS Information Technology (Mobile & Web Apps)</li>
+            <li>BS Architecture</li>
+          </ul>
+        </div>
+
+        <div class="program-section">
+          <h3>Graduate Studies Program Offerings</h3>
+          <ul>
+            <li>
+              Master in Management with specialization in Business Analytics
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -1411,15 +1491,7 @@
       document.getElementById("permanentBarangay"),
       document.getElementById("permanentZip"),
     ];
-
-    function setPermanentFieldsDisabled(disabled) {
-      permanentFields.forEach((field) => {
-        if (field) field.disabled = disabled;
-      });
-    }
-
-    sameAsPresent.addEventListener("change", function () {
-      setPermanentFieldsDisabled(this.checked);
-    });
   });
 </script>
+
+<script src="{% static 'script/script.js' %}"></script>
