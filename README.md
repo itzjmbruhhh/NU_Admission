@@ -7,6 +7,7 @@ A Django-based student admission system for NU Lipa, allowing student registrati
 ## **Setup Instructions**
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/itzjmbruhhh/NU_Admission.git
 cd NU_Admission/dmission_portal
@@ -15,6 +16,7 @@ cd NU_Admission/dmission_portal
 ---
 
 ### 2. Create a Virtual Environment
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate   # Linux/macOS
@@ -24,6 +26,7 @@ venv\Scripts\activate      # Windows
 ---
 
 ### 3. Install Dependencies
+
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
@@ -32,6 +35,7 @@ pip install -r requirements.txt
 ---
 
 ### 4. Apply Migrations
+
 ```bash
 python manage.py makemigrations
 python manage.py migrate
@@ -40,31 +44,33 @@ python manage.py migrate
 ---
 
 ### 5. Create Superuser (Admin)
+
 ```bash
 python manage.py createsuperuser
 ```
+
 Follow the prompts to create your admin account.
 
 ---
 
 ### 6. Run the Development Server
+
 ```bash
 python manage.py runserver
 ```
 
 - Open your browser at `http://127.0.0.1:8000/` for the homepage.
 
-Django URL Patterns
--------------------
+## Django URL Patterns
 
-URL Path                  | View Function      | Template / Notes
---------------------------|------------------|-----------------------------
-''                        | index             | templates/index.html
-'register/'               | register          | templates/registration.html
-'loginAdmin/'             | loginAdmin        | templates/login.html
-'adminDash/'              | adminDash         | templates/admin.html / dashboard
-'student/<int:pk>/'      | student_detail    | templates/student_detail.html
-'super_admin/'            | admin.site.urls   | Django Admin Panel
+| URL Path            | View Function   | Template / Notes                 |
+| ------------------- | --------------- | -------------------------------- |
+| ''                  | index           | templates/index.html             |
+| 'register/'         | register        | templates/registration.html      |
+| 'loginAdmin/'       | loginAdmin      | templates/login.html             |
+| 'adminDash/'        | adminDash       | templates/admin.html / dashboard |
+| 'student/<int:pk>/' | student_detail  | templates/student_detail.html    |
+| 'super_admin/'      | admin.site.urls | Django Admin Panel               |
 
 ---
 
@@ -84,7 +90,8 @@ URL Path                  | View Function      | Template / Notes
 - `templates/` → HTML templates for index, registration, login, and admin views.
 - `static/` → CSS, JS, images, and other static assets.
 - `requirements.txt` → Python dependencies (Django, django-import-export, etc.)
-test
+  test
+
 ---
 
 ## **Tips / Notes**

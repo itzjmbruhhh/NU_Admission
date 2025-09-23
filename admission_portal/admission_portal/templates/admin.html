@@ -9,7 +9,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="{% static 'css/admin_chart.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/admin_chart.css' %}?{% now 'U' %}" />
   </head>
   <body>
     <div class="admin-page">
@@ -327,7 +327,25 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="{% static 'script/admin-dashboard.js' %}"></script>
     <script>
+      function getProgramAbbreviation(name) {
+        const map = {
+          "Bachelor of Science in Psychology": "BPSY",
+          "Bachelor of Science in Nursing": "BSN",
+          "Bachelor of Science in Medical Technology": "BSMT",
+          "Bachelor of Science in Information Technology": "BSIT",
+          "Bachelor of Science in Information Technology with specilization in Mobile and Web Applications": "BSIT",
+          "Bachelor of Science in Computer Science": "BSCS",
+          "Bachelor of Science in Civil Engineering": "BSCE",
+          "Bachelor of Science in Architecture": "BSARCH",
+          "Bachelor of Science in Tourism Management": "BSTM",
+          "Bachelor of Science in Business Administration major in Marketing Management": "BSBA-MktgMgt",
+          "Bachelor of Science in Business Administration major in Financial Management": "BSBA-FinMgt",
+          "Bachelor of Science in Accountancy": "BSA"
+        };
+        return map[name] || name;
+      }
       document.addEventListener('DOMContentLoaded', function () {
+        // Section tab activation
         if (
           window.location.pathname.includes('adminDash') ||
           window.location.search.match(/(program=|status=|school_year=|student_id=|page=)/)
@@ -335,6 +353,11 @@
           if (typeof showSection === 'function') {
             showSection('search');
           }
+        }
+        // Convert top program to abbreviation
+        var topProgramElem = document.querySelector('.summary-card.info .card-content h2');
+        if (topProgramElem) {
+          topProgramElem.textContent = getProgramAbbreviation(topProgramElem.textContent.trim());
         }
       });
     </script>

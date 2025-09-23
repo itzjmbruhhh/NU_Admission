@@ -69,12 +69,34 @@ document.addEventListener("DOMContentLoaded", function () {
   // Program Popularity (Pie Chart)
   // ==========================
   // Program Popularity Pie Chart (actual data)
-  let programLabels = JSON.parse(
+  let programLabelsRaw = JSON.parse(
     document.getElementById("program-labels").textContent
   );
   let programData = JSON.parse(
     document.getElementById("program-data").textContent
   );
+  // Map full program names to abbreviations
+  function getProgramAbbreviation(name) {
+    const map = {
+      "Bachelor of Science in Psychology": "BPSY",
+      "Bachelor of Science in Nursing": "BSN",
+      "Bachelor of Science in Medical Technology": "BSMT",
+      "Bachelor of Science in Information Technology": "BSIT",
+      "Bachelor of Science in Information Technology with specilization in Mobile and Web Applications":
+        "BSIT",
+      "Bachelor of Science in Computer Science": "BSCS",
+      "Bachelor of Science in Civil Engineering": "BSCE",
+      "Bachelor of Science in Architecture": "BSARCH",
+      "Bachelor of Science in Tourism Management": "BSTM",
+      "Bachelor of Science in Business Administration Major in Marketing Management":
+        "BSBA-MktgMgt",
+      "Bachelor of Science in Business Administration Major in Financial Management":
+        "BSBA-FinMgt",
+      "Bachelor of Science in Accountancy": "BSA",
+    };
+    return map[name] || name;
+  }
+  let programLabels = programLabelsRaw.map(getProgramAbbreviation);
   let programColors = [
     "#1e40af",
     "#FFD700",
