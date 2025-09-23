@@ -152,3 +152,26 @@ if (!document.getElementById("notif-anim")) {
     `;
     document.head.appendChild(style);
 }
+
+
+  function openModal() {
+    document.getElementById("modalOverlay").style.display = "flex"; 
+  }
+
+  function closeModal() {
+    document.getElementById("modalOverlay").style.display = "none";
+  }
+
+  // Allow closing by clicking outside modal
+  document.addEventListener("click", function (e) {
+    if (e.target.id === "modalOverlay") {
+      closeModal();
+    }
+  });
+
+  //  Auto-open modal when page loads
+  window.addEventListener("load", function () {
+    openModal();
+  });
+
+

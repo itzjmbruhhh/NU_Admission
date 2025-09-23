@@ -5,9 +5,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Registration - NU Lipa Smart Admission</title>
-    <link rel="stylesheet" href="{% static 'css/registration.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/registration.css' %}?{% now 'U' %}">
   </head>
   <body>
+
+    
+
     <div class="header">
       <div class="logo">
         <h1>NUQuest</h1>
@@ -18,6 +21,8 @@
     <div class="container">
       <div class="form-container">
         <h2 class="form-title">Student Registration Form</h2>
+
+        
 
         <form id="registrationForm" method="POST" action="{% url 'register' %}">
           {% csrf_token %}
@@ -566,6 +571,80 @@
       </div>
     </div>
 
+    
+<!-- ===== Program Offerings Modal Overlay ===== -->
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modalbox">
+    <button class="close-btn" onclick="closeModal()">✖</button>
+
+    <!-- NU Header -->
+    <div class="modalbox-header">
+      <div class="header-left">
+        <img src="{% static 'img/Nulogo.webp' %}" alt="NU Logo" class="nu-logo" />
+        <span class="nu-text">NU LIPA</span>
+      </div>
+      <div class="header-right">
+        <span class="tagline">Education that works.</span>
+      </div>
+    </div>
+
+    <!-- Poster Title Section -->
+    <div class="poster-title">
+      <h1>ENROLLMENT ONGOING!</h1>
+      <h2>PROGRAM OFFERINGS</h2>
+    </div>
+
+    <!-- ===== Program Sections ===== -->
+    <div class="program-section">
+      <h3>Senior High School</h3>
+      <ul>
+        <li>Accountancy, Business and Management (ABM)</li>
+        <li>Humanities, and Social Sciences (HUMSS)</li>
+        <li>Science, Technology, Engineering and Mathematics (STEM)</li>
+      </ul>
+    </div>
+
+    <div class="program-section">
+      <h3>School of Allied Health and Sciences (SAHS)</h3>
+      <ul>
+        <li>BS Medical Technology</li>
+        <li>BS Psychology</li>
+        <li>BS Nursing</li>
+      </ul>
+    </div>
+
+    <div class="program-section">
+      <h3>School of Accountancy, Business, and Management (SABM)</h3>
+      <ul>
+        <li>BS Accountancy</li>
+        <li>BSBA Major in Financial Management</li>
+        <li>BSBA Major in Marketing Management</li>
+        <li>BS Tourism Management</li>
+      </ul>
+    </div>
+
+    <div class="program-section">
+      <h3>School of Architecture, Computing, and Engineering (SACE)</h3>
+      <ul>
+        <li>BS Civil Engineering</li>
+        <li>BS Computer Science (Machine Learning)</li>
+        <li>BS Information Technology (Mobile & Web Apps)</li>
+        <li>BS Architecture</li>
+      </ul>
+    </div>
+
+    <div class="program-section">
+      <h3>Graduate Studies Program Offerings</h3>
+      <ul>
+        <li>Master in Management with specialization in Business Analytics</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+
+
     <script>
       (function () {
         const formEl = document.getElementById("registrationForm");
@@ -920,7 +999,30 @@
           this.value = this.value.replace(/\D/g, ""); // remove non-digits
         });
       });
+      
     </script>
+    <script>
+  
+  function openModal() {
+    document.getElementById("modalOverlay").style.display = "flex"; 
+  }
+
+  function closeModal() {
+    document.getElementById("modalOverlay").style.display = "none";
+  }
+
+  // Allow closing by clicking outside modal
+  document.addEventListener("click", function (e) {
+    if (e.target.id === "modalOverlay") {
+      closeModal();
+    }
+  });
+
+  //  Auto-open modal when page loads
+  window.addEventListener("load", function () {
+    openModal();
+  });
+</script>
   </body>
 </html>
 
@@ -935,14 +1037,11 @@
       document.getElementById("permanentZip"),
     ];
 
-    function setPermanentFieldsDisabled(disabled) {
-      permanentFields.forEach((field) => {
-        if (field) field.disabled = disabled;
-      });
-    }
-
-    sameAsPresent.addEventListener("change", function () {
-      setPermanentFieldsDisabled(this.checked);
-    });
+    
   });
-</script>
+  </script>
+  
+  <script src="{% static 'script/script.js' %}"></script>
+  
+
+
