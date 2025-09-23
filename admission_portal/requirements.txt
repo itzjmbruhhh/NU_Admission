@@ -10,3 +10,6 @@ psycopg2-binary
 python-dotenv
 django-import-export
 openpyxl
+pandas
+joblib
+scikit-learn==1.6.1
