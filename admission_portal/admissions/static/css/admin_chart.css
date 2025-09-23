@@ -488,164 +488,64 @@
 .btn.success:hover { background: #047857; }
 .btn.secondary:hover { background: #475569; }
 
-/* ===============================
-   RECORDS SECTION
-   =============================== */
-.records-section {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px var(--shadow);
-  margin-bottom: 32px;
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-
-.records-header {
-  padding: 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.records-header h3 {
-  margin: 0;
-  color: var(--nu-blue);
-  font-size: 1.2rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.records-actions {
-  display: flex;
-  gap: 12px;
-}
-
+/* =====================================
+   RECORDS TABLE – SCROLLABLE FULL INFO
+   ===================================== */
 .table-container {
-  overflow-x: auto;
+  width: 100%;
+  max-height: 70vh;       /* fits inside page */
+  overflow-x: auto;       /* horizontal scroll */
+  overflow-y: auto;       /* vertical scroll */
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 16px;
 }
 
+/* Wide table for all columns */
 .modern-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 900px;
-  font-size: 0.9rem;
+  min-width: 1800px;      /* fits all fields */
+  font-size: 0.85rem;
+  table-layout: auto;
 }
 
-.modern-table th,
-.modern-table td {
-  padding: 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
+/* Sticky header */
 .modern-table thead th {
+  position: sticky;
+  top: 0;
   background: var(--light);
   color: var(--nu-blue);
-  font-weight: 600;
-  font-size: 0.85rem;
+  font-weight: 700;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  z-index: 2;
+  border-bottom: 2px solid var(--border);
 }
 
+/* Force one-liner cells */
+.modern-table th,
+.modern-table td {
+  white-space: nowrap;    /* keeps text in one line */
+  overflow: hidden;       /* hides overflow */
+  text-overflow: ellipsis; /* adds "..." if text is too long */
+  max-width: 220px;       /* adjust column width */
+}
+
+
+/* Row hover */
 .modern-table tbody tr:hover {
-  background: var(--light);
+  background: #f9fafb;
 }
 
-.modern-table tbody td {
-  color: #374151;
-}
-
-/* ===============================
-   TABLE BADGES AND STATUS
-   =============================== */
-.program-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.program-badge.bscs { background: #dbeafe; color: var(--primary); }
-.program-badge.bsit { background: #d1fae5; color: var(--success); }
-.program-badge.nursing { background: #fef3c7; color: var(--warning); }
-.program-badge.business { background: #e0e7ff; color: #6366f1; }
-
-.chance-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.chance-badge.high { background: #dcfce7; color: var(--success); }
-.chance-badge.medium { background: #fef3c7; color: var(--warning); }
-.chance-badge.low { background: #fee2e2; color: var(--danger); }
-
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.status-badge.approved { background: #dcfce7; color: var(--success); }
-.status-badge.pending { background: #fef3c7; color: var(--warning); }
-.status-badge.rejected { background: #fee2e2; color: var(--danger); }
-
-/* ===============================
-   ACTION BUTTONS
-   =============================== */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-icon {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-  font-size: 0.8rem;
-}
-
-.btn-icon.view { background: #e0f2fe; color: var(--info); }
-.btn-icon.edit { background: #fff3cd; color: var(--warning); }
-.btn-icon.delete { background: #fee2e2; color: var(--danger); }
-
-.btn-icon:hover {
-  transform: scale(1.1);
-}
-
-.btn-icon.view:hover { background: #b3e5fc; }
-.btn-icon.edit:hover { background: #ffeaa7; }
-.btn-icon.delete:hover { background: #ffcdd2; }
-
-/* ===============================
-   NO RESULTS
-   =============================== */
+/* No results row */
 .no-results {
   text-align: center;
   color: var(--muted);
   padding: 40px;
-  font-size: 0.95rem;
-}
-
-.no-results i {
-  font-size: 2rem;
-  margin-bottom: 12px;
-  display: block;
+  font-size: 0.9rem;
 }
 
 /* ===============================
