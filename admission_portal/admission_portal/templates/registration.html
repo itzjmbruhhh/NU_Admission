@@ -67,12 +67,7 @@
               <div class="form-grid">
                 <div class="form-group">
                   <label for="schoolYear">School Year *</label>
-                  <select id="schoolYear" name="schoolYear" required>
-                    <option value="">Select School Year</option>
-                    <option value="2024-2025">2024-2025</option>
-                    <option value="2025-2026">2025-2026</option>
-                    <option value="2027-2028">2027-2028</option>
-                  </select>
+                  <input type="text" id="schoolYear" name="schoolYear" readonly required />
                 </div>
 
                 <div class="form-group">
@@ -364,6 +359,10 @@
                     type="tel"
                     id="mobileNumber"
                     name="mobileNumber"
+                    class="mobile-number"
+                    maxlength="11"
+                    pattern="\d{11}"
+                    placeholder="e.g. 09918082760"
                     required
                   />
                 </div>
@@ -385,6 +384,7 @@
                     type="text"
                     id="presentAddress"
                     name="presentAddress"
+                    placeholder="House No., Street, Subdivision, Village"
                     required
                   />
                 </div>
@@ -443,6 +443,7 @@
                     type="text"
                     id="permanentAddress"
                     name="permanentAddress"
+                    placeholder="House No., Street, Subdivision, Village"
                     required
                   />
                 </div>
@@ -558,6 +559,10 @@
                     type="text"
                     id="guardianContact"
                     name="guardianContact"
+                    class="mobile-number"
+                    maxlength="11"
+                    pattern="\d{11}"
+                    placeholder="e.g. 09918082760"
                     required
                   />
                 </div>
@@ -758,6 +763,27 @@
         setupZipValidation();
         // loadDraftOnInit(); // <-- removed: do not auto-restore on every load
         clearDraftOnLoad(); // <-- added: only clear draft when the page was reloaded
+
+        //  Auto-generate and set school year
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const month = today.getMonth();
+
+      // School year starts in July
+      let startYear, endYear;
+      if (month >= 6) {
+        startYear = currentYear;
+        endYear = currentYear + 1;
+      } else {
+        startYear = currentYear - 1;
+        endYear = currentYear;
+      }
+
+      const schoolYear = `${startYear}-${endYear}`;
+      const schoolYearEl = document.getElementById('schoolYear');
+        if (schoolYearEl) {
+          schoolYearEl.value = schoolYear;
+        }
       });
 
       // Initialize the form navigation and progress
@@ -1469,7 +1495,7 @@
           const zipInput = document.getElementById(id);
           if (zipInput) {
             zipInput.addEventListener("input", function () {
-              this.value = this.value.replace(/\D/g, ""); // remove non-digits
+              this.value = this.value.replace(/\D/g, "").slice(0, 4); // remove non-digits and limit to 4 chars
             });
           }
         });
@@ -1477,21 +1503,18 @@
 
       // Make changeSection function globally available for onclick handlers
       window.changeSection = changeSection;
+
+      // Mobile number input restriction to digits only and max length
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".mobile-number").forEach(input => {
+          input.addEventListener("input", function () {
+            // Allow only digits and limit to 11 characters
+            this.value = this.value.replace(/\D/g, "").slice(0, 11);
+          });
+        });
+      });
     </script>
   </body>
 </html>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const sameAsPresent = document.getElementById("sameAsPresent");
-    const permanentFields = [
-      document.getElementById("permanentAddress"),
-      document.getElementById("permanentProvince"),
-      document.getElementById("permanentCity"),
-      document.getElementById("permanentBarangay"),
-      document.getElementById("permanentZip"),
-    ];
-  });
-</script>
 
 <script src="{% static 'script/script.js' %}"></script>
