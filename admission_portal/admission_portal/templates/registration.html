@@ -67,7 +67,13 @@
               <div class="form-grid">
                 <div class="form-group">
                   <label for="schoolYear">School Year *</label>
-                  <input type="text" id="schoolYear" name="schoolYear" readonly required />
+                  <input
+                    type="text"
+                    id="schoolYear"
+                    name="schoolYear"
+                    readonly
+                    required
+                  />
                 </div>
 
                 <div class="form-group">
@@ -118,6 +124,7 @@
                       <option value="BS Architecture">
                         Bachelor of Science in Architecture
                       </option>
+                      g
                       <option value="BS Civil Engineering">
                         Bachelor of Science in Civil Engineering
                       </option>
@@ -765,22 +772,22 @@
         clearDraftOnLoad(); // <-- added: only clear draft when the page was reloaded
 
         //  Auto-generate and set school year
-      const today = new Date();
-      const currentYear = today.getFullYear();
-      const month = today.getMonth();
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const month = today.getMonth();
 
-      // School year starts in July
-      let startYear, endYear;
-      if (month >= 6) {
-        startYear = currentYear;
-        endYear = currentYear + 1;
-      } else {
-        startYear = currentYear - 1;
-        endYear = currentYear;
-      }
+        // School year starts in July
+        let startYear, endYear;
+        if (month >= 6) {
+          startYear = currentYear;
+          endYear = currentYear + 1;
+        } else {
+          startYear = currentYear - 1;
+          endYear = currentYear;
+        }
 
-      const schoolYear = `${startYear}-${endYear}`;
-      const schoolYearEl = document.getElementById('schoolYear');
+        const schoolYear = `${startYear}-${endYear}`;
+        const schoolYearEl = document.getElementById("schoolYear");
         if (schoolYearEl) {
           schoolYearEl.value = schoolYear;
         }
@@ -1122,12 +1129,23 @@
           });
         });
 
-        // Check for success flag from Django backend
+        // Check for success flag from Django backend — only on reload/redirect
         const successMeta = document.querySelector(
           'meta[name="submission_success"]'
         );
         const successFlag = successMeta && successMeta.content === "true";
-        if (successFlag) {
+
+        let isPageNavigation = false;
+        if (performance && performance.getEntriesByType) {
+          const entries = performance.getEntriesByType("navigation");
+          if (entries.length > 0) {
+            const navType = entries[0].type;
+            // "navigate" = fresh visit, "reload" = user reload
+            isPageNavigation = navType === "navigate" || navType === "reload";
+          }
+        }
+
+        if (successFlag && isPageNavigation) {
           const successModal = document.getElementById("successModal");
           if (successModal) successModal.style.display = "block";
         }
@@ -1379,40 +1397,61 @@
         const sameAsCheckbox = document.getElementById("sameAsPresent");
         if (!sameAsCheckbox) return;
 
-        function copyPresentToPermanent() {
+        // Utility: wait until options are loaded into a <select>
+        function waitForOptions(selectElement) {
+          return new Promise((resolve) => {
+            if (selectElement.options.length > 1) {
+              resolve(); // already loaded
+            } else {
+              const observer = new MutationObserver(() => {
+                if (selectElement.options.length > 1) {
+                  observer.disconnect();
+                  resolve();
+                }
+              });
+              observer.observe(selectElement, { childList: true });
+            }
+          });
+        }
+
+        async function copyPresentToPermanent() {
           const presentAddress = document.getElementById("presentAddress");
           const presentZip = document.getElementById("presentZip");
           const currentRegion = document.getElementById("currentRegion");
+          const presentProvince = document.getElementById("presentProvince");
+          const presentCity = document.getElementById("presentCity");
+          const presentBarangay = document.getElementById("presentBarangay");
+
           const permanentAddress = document.getElementById("permanentAddress");
           const permanentZip = document.getElementById("permanentZip");
           const permanentRegion = document.getElementById("permanentRegion");
-          const presentProvince = document.getElementById("presentProvince");
           const permanentProvince =
             document.getElementById("permanentProvince");
-          const presentCity = document.getElementById("presentCity");
           const permanentCity = document.getElementById("permanentCity");
-          const presentBarangay = document.getElementById("presentBarangay");
           const permanentBarangay =
             document.getElementById("permanentBarangay");
 
-          if (presentAddress && permanentAddress) {
-            permanentAddress.value = presentAddress.value;
-          }
-          if (presentZip && permanentZip) {
-            permanentZip.value = presentZip.value;
-          }
-          if (currentRegion && permanentRegion) {
-            permanentRegion.value = currentRegion.value;
-          }
-          if (presentProvince && permanentProvince) {
-            permanentProvince.value = presentProvince.value;
-          }
-          if (presentCity && permanentCity) {
-            permanentCity.value = presentCity.value;
-          }
-          if (presentBarangay && permanentBarangay) {
-            permanentBarangay.value = presentBarangay.value;
-          }
+          // Copy address + zip immediately
+          permanentAddress.value = presentAddress.value;
+          permanentZip.value = presentZip.value;
+
+          // Copy region → then wait for provinces to load
+          permanentRegion.value = currentRegion.value;
+          permanentRegion.dispatchEvent(new Event("change"));
+          await waitForOptions(permanentProvince);
+
+          // Copy province → then wait for cities
+          permanentProvince.value = presentProvince.value;
+          permanentProvince.dispatchEvent(new Event("change"));
+          await waitForOptions(permanentCity);
+
+          // Copy city → then wait for barangays
+          permanentCity.value = presentCity.value;
+          permanentCity.dispatchEvent(new Event("change"));
+          await waitForOptions(permanentBarangay);
+
+          // Finally copy barangay
+          permanentBarangay.value = presentBarangay.value;
         }
 
         function clearPermanentFields() {
@@ -1506,7 +1545,7 @@
 
       // Mobile number input restriction to digits only and max length
       document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".mobile-number").forEach(input => {
+        document.querySelectorAll(".mobile-number").forEach((input) => {
           input.addEventListener("input", function () {
             // Allow only digits and limit to 11 characters
             this.value = this.value.replace(/\D/g, "").slice(0, 11);
