@@ -276,7 +276,7 @@ body {
 
 .progress-step.active {
   opacity: 1;
-  transform: translateX(5px);
+  transform: translateX(.5px);
 }
 
 .progress-step.completed {
