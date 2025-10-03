@@ -23,9 +23,6 @@
             </div>
           </div>
           <nav class="header-nav">
-            <span class="nav-link active"
-              ><i class="fas fa-tachometer-alt"></i> Dashboard</span
-            >
             <span class="nav-link" id="adminName">Welcome, Admin!</span>
           </nav>
         </div>
@@ -217,7 +214,6 @@
       <tr>
         <th>Student ID</th>
         <th>Full Name</th>        
-        <th>Suffix</th>
         <th>Prefix</th>
         <th>Program (First Choice)</th>
         <th>Program (Second Choice)</th>
@@ -231,24 +227,12 @@
         <th>Birth Date</th>
         <th>Birth Place</th>
         <th>Birth City</th>
-        <th>Place of Birth (Province)</th>
         <th>Gender</th>
         <th>Citizen of</th>
         <th>Religion</th>
         <th>Civil Status</th>
-        <th>Current Region</th>
-        <th>Current Province</th>
-        <th>City/Municipality</th>
-        <th>Current Brgy.</th>
-        <th>Current Street</th>
-        <th>Current Postal Code</th>
-        <th>Permanent Country</th>
-        <th>Permanent Region</th>
-        <th>Permanent Province</th>
-        <th>Permanent City</th>
-        <th>Permanent Brgy.</th>
-        <th>Permanent Street</th>
-        <th>Permanent Postal Code</th>
+  <th>Complete Current Address</th>
+  <th>Complete Permanent Address</th>
         <th>Disability</th>
         <th>Indigenous</th>
         <th>Birth Country</th>
@@ -263,18 +247,53 @@
       <tr>
         <td>{{ student.student_id }}</td>
         <td>{{ student.name }}</td>   
-        <td>{{ student.suffix }}</td>
         <td>{{ student.prefix }}</td>
-        <td>{{ student.program_first_choice }}</td>
-        <td>{{ student.program_second_choice }}</td>
+        <td>
+          {% with pf=student.program_first_choice|default_if_none:""|upper %}
+            {% if pf == 'BACHELOR OF SCIENCE IN NURSING' %}<span class="program-badge bsn" title="{{ student.program_first_choice }}">BSN</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN CIVIL ENGINEERING' %}<span class="program-badge bsce" title="{{ student.program_first_choice }}">BSCE</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN MEDICAL TECHNOLOGY' %}<span class="program-badge bsmt" title="{{ student.program_first_choice }}">BSMT</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN PSYCHOLOGY' %}<span class="program-badge bspsy" title="{{ student.program_first_choice }}">BSPSY</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN ACCOUNTANCY' %}<span class="program-badge bsa" title="{{ student.program_first_choice }}">BSA</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY' %}<span class="program-badge bsit" title="{{ student.program_first_choice }}">BSIT</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN TOURISM MANAGEMENT' %}<span class="program-badge bstm" title="{{ student.program_first_choice }}">BSTM</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN ARCHITECTURE' %}<span class="program-badge bsarch" title="{{ student.program_first_choice }}">BSARCH</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN MARKETING MANAGEMENT' %}<span class="program-badge bsba-mktgmgt" title="{{ student.program_first_choice }}">BSBA-MKTGMGT</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN FINANCIAL MANAGEMENT' %}<span class="program-badge bsba-finmgt" title="{{ student.program_first_choice }}">BSBA-FINMGT</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN COMPUTER SCIENCE' %}<span class="program-badge bscs" title="{{ student.program_first_choice }}">BSCS</span>
+            {% else %}<span class="program-badge other" title="{{ student.program_first_choice }}">{{ student.program_first_choice }}</span>{% endif %}
+          {% endwith %}
+        </td>
+        <td>
+          {% with ps=student.program_second_choice|default_if_none:""|upper %}
+            {% if not ps %}{% comment %}Empty second choice{% endcomment %}{% elif ps == 'BACHELOR OF SCIENCE IN NURSING' %}<span class="program-badge bsn" title="{{ student.program_second_choice }}">BSN</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN CIVIL ENGINEERING' %}<span class="program-badge bsce" title="{{ student.program_second_choice }}">BSCE</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN MEDICAL TECHNOLOGY' %}<span class="program-badge bsmt" title="{{ student.program_second_choice }}">BSMT</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN PSYCHOLOGY' %}<span class="program-badge bspsy" title="{{ student.program_second_choice }}">BSPSY</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN ACCOUNTANCY' %}<span class="program-badge bsa" title="{{ student.program_second_choice }}">BSA</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY' %}<span class="program-badge bsit" title="{{ student.program_second_choice }}">BSIT</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN TOURISM MANAGEMENT' %}<span class="program-badge bstm" title="{{ student.program_second_choice }}">BSTM</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN ARCHITECTURE' %}<span class="program-badge bsarch" title="{{ student.program_second_choice }}">BSARCH</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN MARKETING MANAGEMENT' %}<span class="program-badge bsba-mktgmgt" title="{{ student.program_second_choice }}">BSBA-MKTGMGT</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN FINANCIAL MANAGEMENT' %}<span class="program-badge bsba-finmgt" title="{{ student.program_second_choice }}">BSBA-FINMGT</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN COMPUTER SCIENCE' %}<span class="program-badge bscs" title="{{ student.program_second_choice }}">BSCS</span>
+            {% else %}<span class="program-badge other" title="{{ student.program_second_choice }}">Other</span>{% endif %}
+          {% endwith %}
+        </td>
         <td>
           {% if student.enrollment_chance is not None %}
-            {{ student.enrollment_chance|floatformat:2 }}%
+            <span class="enrollment-chance good">{{ student.enrollment_chance|floatformat:2 }}%</span>
           {% else %}
-            N/A
+            <span class="enrollment-chance na">N/A</span>
           {% endif %}
         </td>
-        <td>{{ student.status }}</td>
+        <td>
+          {% if student.status == 'Enrolled' %}
+            <span class="status-badge enrolled">Enrolled</span>
+          {% else %}
+            <span class="status-badge not-enrolled">Not Enrolled</span>
+          {% endif %}
+        </td>
         <td>{{ student.school_year }}</td>
         <td>{{ student.school_term }}</td>
         <td>{{ student.campus_code }}</td>
@@ -283,28 +302,30 @@
         <td>{{ student.birth_date }}</td>
         <td>{{ student.birth_place }}</td>
         <td>{{ student.birth_city }}</td>
-        <td>{{ student.birth_province }}</td>
         <td>{{ student.gender }}</td>
         <td>{{ student.citizen_of }}</td>
         <td>{{ student.religion }}</td>
         <td>{{ student.civil_status }}</td>
-        <td>{{ student.current_region }}</td>
-        <td>{{ student.current_province }}</td>
-        <td>{{ student.current_city }}</td>
-        <td>{{ student.current_brgy }}</td>
-        <td>{{ student.current_street }}</td>
-        <td>{{ student.current_postal_code }}</td>
-        <td>{{ student.permanent_country }}</td>
-        <td>{{ student.permanent_region }}</td>
-        <td>{{ student.permanent_province }}</td>
-        <td>{{ student.permanent_city }}</td>
-        <td>{{ student.permanent_brgy }}</td>
-        <td>{{ student.permanent_street }}</td>
-        <td>{{ student.permanent_postal_code }}</td>
-        <td>{{ student.disability }}</td>
-        <td>{{ student.indigenous }}</td>
+        <td class="address-cell">
+          {% with parts="" %}
+            {% firstof student.current_street "" %}{% if student.current_brgy %}, {{ student.current_brgy }}{% endif %}{% if student.current_city %}, {{ student.current_city }}{% endif %}{% if student.current_province %}, {{ student.current_province }}{% endif %}{% if student.current_region %}, {{ student.current_region }}{% endif %}{% if student.current_postal_code %} {{ student.current_postal_code }}{% endif %}
+          {% endwith %}
+        </td>
+        <td class="address-cell">
+          {% with parts="" %}
+            {% firstof student.permanent_street "" %}{% if student.permanent_brgy %}, {{ student.permanent_brgy }}{% endif %}{% if student.permanent_city %}, {{ student.permanent_city }}{% endif %}{% if student.permanent_province %}, {{ student.permanent_province }}{% endif %}{% if student.permanent_region %}, {{ student.permanent_region }}{% endif %}{% if student.permanent_country %}, {{ student.permanent_country }}{% endif %}{% if student.permanent_postal_code %} {{ student.permanent_postal_code }}{% endif %}
+          {% endwith %}
+        </td>
+        <td>
+          {% if student.disability|stringformat:"s" == "1" %}Disabled{% else %}None{% endif %}
+        </td>
+        <td>
+          {% if student.indigenous|stringformat:"s" == "1" %}Indigenous{% else %}None{% endif %}
+        </td>
         <td>{{ student.birth_country }}</td>
-        <td>{{ student.requirement_agreement }}</td>
+        <td>
+          {% if student.requirement_agreement|stringformat:"s" == "1" %}Yes{% else %}No{% endif %}
+        </td>
         <td>{{ student.student_type }}</td>
         <td>{{ student.last_school_attended }}</td>
         <td>{{ student.school_type }}</td>
