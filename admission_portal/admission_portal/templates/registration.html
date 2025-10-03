@@ -67,7 +67,13 @@
               <div class="form-grid">
                 <div class="form-group">
                   <label for="schoolYear">School Year *</label>
-                  <input type="text" id="schoolYear" name="schoolYear" readonly required />
+                  <input
+                    type="text"
+                    id="schoolYear"
+                    name="schoolYear"
+                    readonly
+                    required
+                  />
                 </div>
 
                 <div class="form-group">
@@ -97,34 +103,35 @@
                     <optgroup
                       label="School of Accountancy, Business, and Management(SABM)"
                     >
-                      <option value="BS Accountancy">
+                      <option value="Bachelor of Science in Accountancy">
                         Bachelor of Science in Accountancy
                       </option>
-                      <option value="BS Business Administration">
+                      <option value="Bachelor of Science in Business Administration">
                         Bachelor of Science in Business Administration major in
                         Financial Management
                       </option>
-                      <option value="BS Marketing Management">
+                      <option value="Bachelor of Science in Marketing Management">
                         Bachelor of Science in Business Administration major in
                         Marketing Management
                       </option>
-                      <option value="BS Tourism">
+                      <option value="Bachelor of Science in Tourism">
                         Bachelor of Science in Tourism Management
                       </option>
                     </optgroup>
                     <optgroup
                       label="School of Architecture, Computing, and Engineering (SACE)"
                     >
-                      <option value="BS Architecture">
+                      <option value="Bachelor of Science in Architecture">
                         Bachelor of Science in Architecture
                       </option>
-                      <option value="BS Civil Engineering">
+                      g
+                      <option value="Bachelor of Science in Civil Engineering">
                         Bachelor of Science in Civil Engineering
                       </option>
-                      <option value="BS Computer Science">
+                      <option value="Bachelor of Science in Computer Science">
                         Bachelor of Science in Computer Science
                       </option>
-                      <option value="BS Information Technology">
+                      <option value="Bachelor of Science in Information Technology">
                         Bachelor of Science in Information Technology with
                         specilization in Mobile and Web Applications
                       </option>
@@ -132,13 +139,13 @@
                     <optgroup
                       label="School of Allied Health and Sciences (SAHS)"
                     >
-                      <option value="BS MedTech">
+                      <option value="Bachelor of Science in MedTech">
                         Bachelor of Science in Medical Technology
                       </option>
-                      <option value="BS Nursing">
+                      <option value="Bachelor of Science in Nursing">
                         Bachelor of Science in Nursing
                       </option>
-                      <option value="BS Psychology">
+                      <option value="Bachelor of Science in Psychology">
                         Bachelor of Science in Psychology
                       </option>
                     </optgroup>
@@ -152,47 +159,47 @@
                     <optgroup
                       label="School of Accountancy, Business, and Management(SABM)"
                     >
-                      <option value="BS Accountancy">
+                      <option value="Bachelor of Science in Accountancy">
                         Bachelor of Science in Accountancy
                       </option>
-                      <option value="BS Business Administration">
+                      <option value="Bachelor of Science in Business Administration">
                         Bachelor of Science in Business Administration major in
                         Financial Management
                       </option>
-                      <option value="BS Marketing Management">
+                      <option value="Bachelor of Science in Marketing Management">
                         Bachelor of Science in Business Administration major in
                         Marketing Management
                       </option>
-                      <option value="BS Tourism">
+                      <option value="Bachelor of Science in Tourism">
                         Bachelor of Science in Tourism Management
                       </option>
                     </optgroup>
                     <optgroup
                       label="School of Architecture, Computing, and Engineering (SACE)"
                     >
-                      <option value="BS Architecture">
+                      <option value="Bachelor of Science in Architecture">
                         Bachelor of Science in Architecture
                       </option>
-                      <option value="BS Civil Engineering">
+                      <option value="Bachelor of Science in Civil Engineering">
                         Bachelor of Science in Civil Engineering
                       </option>
-                      <option value="BS Computer Science">
+                      <option value="Bachelor of Science in Computer Science">
                         Bachelor of Science in Computer Science
                       </option>
-                      <option value="BS Information Technology">
+                      <option value="Bachelor of Science in Information Technology">
                         Bachelor of Science in Information Technology
                       </option>
                     </optgroup>
                     <optgroup
                       label="School of Allied Health and Sciences (SAHS)"
                     >
-                      <option value="BS MedTech">
+                      <option value="Bachelor of Science in MedTech">
                         Bachelor of Science in Medical Technology
                       </option>
-                      <option value="BS Nursing">
+                      <option value="Bachelor of Science in Nursing">
                         Bachelor of Science in Nursing
                       </option>
-                      <option value="BS Psychology">
+                      <option value="Bachelor of Science in Psychology">
                         Bachelor of Science in Psychology
                       </option>
                     </optgroup>
@@ -765,22 +772,22 @@
         clearDraftOnLoad(); // <-- added: only clear draft when the page was reloaded
 
         //  Auto-generate and set school year
-      const today = new Date();
-      const currentYear = today.getFullYear();
-      const month = today.getMonth();
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const month = today.getMonth();
 
-      // School year starts in July
-      let startYear, endYear;
-      if (month >= 6) {
-        startYear = currentYear;
-        endYear = currentYear + 1;
-      } else {
-        startYear = currentYear - 1;
-        endYear = currentYear;
-      }
+        // School year starts in July
+        let startYear, endYear;
+        if (month >= 6) {
+          startYear = currentYear;
+          endYear = currentYear + 1;
+        } else {
+          startYear = currentYear - 1;
+          endYear = currentYear;
+        }
 
-      const schoolYear = `${startYear}-${endYear}`;
-      const schoolYearEl = document.getElementById('schoolYear');
+        const schoolYear = `${startYear}-${endYear}`;
+        const schoolYearEl = document.getElementById("schoolYear");
         if (schoolYearEl) {
           schoolYearEl.value = schoolYear;
         }
@@ -1122,14 +1129,32 @@
           });
         });
 
-        // Check for success flag from Django backend
+        // Check for success flag from Django backend — only on reload/redirect
         const successMeta = document.querySelector(
           'meta[name="submission_success"]'
         );
         const successFlag = successMeta && successMeta.content === "true";
-        if (successFlag) {
+
+        let isPageNavigation = false;
+        if (performance && performance.getEntriesByType) {
+          const entries = performance.getEntriesByType("navigation");
+          if (entries.length > 0) {
+            const navType = entries[0].type;
+            // "navigate" = fresh visit, "reload" = user reload
+            isPageNavigation = navType === "navigate" || navType === "reload";
+          }
+        }
+
+        if (successFlag && isPageNavigation) {
           const successModal = document.getElementById("successModal");
-          if (successModal) successModal.style.display = "block";
+          const modalOverlay = document.getElementById("modalOverlay");
+
+          if (modalOverlay) {
+            modalOverlay.style.display = "none"; // hide overlay
+          }
+          if (successModal) {
+            successModal.style.display = "block"; // show success modal only
+          }
         }
       }
 
@@ -1379,40 +1404,61 @@
         const sameAsCheckbox = document.getElementById("sameAsPresent");
         if (!sameAsCheckbox) return;
 
-        function copyPresentToPermanent() {
+        // Utility: wait until options are loaded into a <select>
+        function waitForOptions(selectElement) {
+          return new Promise((resolve) => {
+            if (selectElement.options.length > 1) {
+              resolve(); // already loaded
+            } else {
+              const observer = new MutationObserver(() => {
+                if (selectElement.options.length > 1) {
+                  observer.disconnect();
+                  resolve();
+                }
+              });
+              observer.observe(selectElement, { childList: true });
+            }
+          });
+        }
+
+        async function copyPresentToPermanent() {
           const presentAddress = document.getElementById("presentAddress");
           const presentZip = document.getElementById("presentZip");
           const currentRegion = document.getElementById("currentRegion");
+          const presentProvince = document.getElementById("presentProvince");
+          const presentCity = document.getElementById("presentCity");
+          const presentBarangay = document.getElementById("presentBarangay");
+
           const permanentAddress = document.getElementById("permanentAddress");
           const permanentZip = document.getElementById("permanentZip");
           const permanentRegion = document.getElementById("permanentRegion");
-          const presentProvince = document.getElementById("presentProvince");
           const permanentProvince =
             document.getElementById("permanentProvince");
-          const presentCity = document.getElementById("presentCity");
           const permanentCity = document.getElementById("permanentCity");
-          const presentBarangay = document.getElementById("presentBarangay");
           const permanentBarangay =
             document.getElementById("permanentBarangay");
 
-          if (presentAddress && permanentAddress) {
-            permanentAddress.value = presentAddress.value;
-          }
-          if (presentZip && permanentZip) {
-            permanentZip.value = presentZip.value;
-          }
-          if (currentRegion && permanentRegion) {
-            permanentRegion.value = currentRegion.value;
-          }
-          if (presentProvince && permanentProvince) {
-            permanentProvince.value = presentProvince.value;
-          }
-          if (presentCity && permanentCity) {
-            permanentCity.value = presentCity.value;
-          }
-          if (presentBarangay && permanentBarangay) {
-            permanentBarangay.value = presentBarangay.value;
-          }
+          // Copy address + zip immediately
+          permanentAddress.value = presentAddress.value;
+          permanentZip.value = presentZip.value;
+
+          // Copy region → then wait for provinces to load
+          permanentRegion.value = currentRegion.value;
+          permanentRegion.dispatchEvent(new Event("change"));
+          await waitForOptions(permanentProvince);
+
+          // Copy province → then wait for cities
+          permanentProvince.value = presentProvince.value;
+          permanentProvince.dispatchEvent(new Event("change"));
+          await waitForOptions(permanentCity);
+
+          // Copy city → then wait for barangays
+          permanentCity.value = presentCity.value;
+          permanentCity.dispatchEvent(new Event("change"));
+          await waitForOptions(permanentBarangay);
+
+          // Finally copy barangay
+          permanentBarangay.value = presentBarangay.value;
         }
 
         function clearPermanentFields() {
@@ -1506,15 +1552,24 @@
 
       // Mobile number input restriction to digits only and max length
       document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".mobile-number").forEach(input => {
+        document.querySelectorAll(".mobile-number").forEach((input) => {
           input.addEventListener("input", function () {
             // Allow only digits and limit to 11 characters
             this.value = this.value.replace(/\D/g, "").slice(0, 11);
           });
         });
       });
+
+      function closeModal() {
+        document.getElementById("modalOverlay").style.display = "none";
+      }
+
+      // Allow closing by clicking outside modal
+      document.addEventListener("click", function (e) {
+        if (e.target.id === "modalOverlay") {
+          closeModal();
+        }
+      });
     </script>
   </body>
 </html>
-
-<script src="{% static 'script/script.js' %}"></script>
