@@ -456,6 +456,8 @@
   justify-content: flex-end;
 }
 
+
+
 /* ===============================
    BUTTONS
    =============================== */
@@ -488,170 +490,60 @@
 .btn.success:hover { background: #047857; }
 .btn.secondary:hover { background: #475569; }
 
-/* ===============================
-   RECORDS SECTION
-   =============================== */
-.records-section {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px var(--shadow);
-  margin-bottom: 32px;
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-
-.records-header {
-  padding: 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.records-header h3 {
-  margin: 0;
-  color: var(--nu-blue);
-  font-size: 1.2rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.records-actions {
-  display: flex;
-  gap: 12px;
-}
-
+/* ==== Student Records Table ==== */
 .table-container {
-  overflow-x: auto;
-}
-
-.modern-table {
   width: 100%;
+  overflow-x: auto;   /* horizontal scroll */
+  overflow-y: auto;   /* vertical scroll */
+  max-height: 600px;  /* adjust height to fit your page */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+/* Table Base */
+.modern-table {
   border-collapse: collapse;
-  min-width: 900px;
-  font-size: 0.9rem;
+  width: 100%;
+  font-size: 14px;
+  color: #1a1a1a;
 }
 
-.modern-table th,
-.modern-table td {
-  padding: 16px;
+/* Table Headers */
+.modern-table th {
+  background-color: #f9fafb;
+  font-weight: bold;
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  position: sticky;
+  top: 0;               /* keeps header visible when scrolling */
+  z-index: 2;
+  white-space: nowrap;  /* keep headers on one line */
 }
 
-.modern-table thead th {
-  background: var(--light);
-  color: var(--nu-blue);
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+/* Table Cells */
+.modern-table td {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  white-space: nowrap;       /* keep text in one line */
+  overflow: hidden;
+  text-overflow: ellipsis;   /* add "..." if text is too long */
+  max-width: 220px;          /* adjust column width */
 }
 
-.modern-table tbody tr:hover {
-  background: var(--light);
+/* Optional: Zebra rows for readability */
+.modern-table tr:nth-child(even) {
+  background-color: #fdfdfd;
 }
 
-.modern-table tbody td {
-  color: #374151;
-}
 
-/* ===============================
-   TABLE BADGES AND STATUS
-   =============================== */
-.program-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
 
-.program-badge.bscs { background: #dbeafe; color: var(--primary); }
-.program-badge.bsit { background: #d1fae5; color: var(--success); }
-.program-badge.nursing { background: #eea5f8; color: 2d2e3a; }
-.program-badge.business { background: #e0e7ff; color: #6366f1; }
-.program-badge.psy { background: #e9e64a; color: #2d2e3a; }
-.program-badge.mt { background: #37bb48; color: #2d2e3a; }
-.program-badge.ce { background: #d4431f; color: #ffffff; }
-.program-badge.arch { background: #441eee; color: #ffffff; }
-.program-badge.tm { background: #6a696b; color: #ffffff; }
-.program-badge.acc { background: #f5dd03; color: #2d2e3a; }
-
-.chance-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.chance-badge.high { background: #dcfce7; color: var(--success); }
-.chance-badge.medium { background: #fef3c7; color: var(--warning); }
-.chance-badge.low { background: #fee2e2; color: var(--danger); }
-
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.status-badge.approved { background: #dcfce7; color: var(--success); }
-.status-badge.pending { background: #fef3c7; color: var(--warning); }
-.status-badge.rejected { background: #fee2e2; color: var(--danger); }
-
-/* ===============================
-   ACTION BUTTONS
-   =============================== */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-icon {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-  font-size: 0.8rem;
-}
-
-.btn-icon.view { background: #e0f2fe; color: var(--info); }
-.btn-icon.edit { background: #fff3cd; color: var(--warning); }
-.btn-icon.delete { background: #fee2e2; color: var(--danger); }
-
-.btn-icon:hover {
-  transform: scale(1.1);
-}
-
-.btn-icon.view:hover { background: #b3e5fc; }
-.btn-icon.edit:hover { background: #ffeaa7; }
-.btn-icon.delete:hover { background: #ffcdd2; }
-
-/* ===============================
-   NO RESULTS
-   =============================== */
+/* No Results Row */
 .no-results {
   text-align: center;
   color: var(--muted);
   padding: 40px;
-  font-size: 0.95rem;
-}
-
-.no-results i {
-  font-size: 2rem;
-  margin-bottom: 12px;
-  display: block;
+  font-size: 0.9rem;
 }
 
 /* ===============================
