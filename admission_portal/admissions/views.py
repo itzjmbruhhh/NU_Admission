@@ -143,6 +143,24 @@ def adminDash(request):
     )
     top_program = top_program_data['program_first_choice'] if top_program_data else None
     top_program_count = top_program_data['count'] if top_program_data else 0
+    # Abbreviation for top program (reuse mapping) for summary card display
+    PROGRAM_ABBREVIATIONS_CARD = {
+        'BACHELOR OF SCIENCE IN NURSING': 'BSN',
+        'BACHELOR OF SCIENCE IN CIVIL ENGINEERING': 'BSCE',
+        'BACHELOR OF SCIENCE IN MEDICAL TECHNOLOGY': 'BSMT',
+        'BACHELOR OF SCIENCE IN PSYCHOLOGY': 'BSPSY',
+        'BACHELOR OF SCIENCE IN ACCOUNTANCY': 'BSA',
+        'BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY': 'BSIT',
+        'BACHELOR OF SCIENCE IN TOURISM MANAGEMENT': 'BSTM',
+        'BACHELOR OF SCIENCE IN ARCHITECTURE': 'BSARCH',
+        'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN MARKETING MANAGEMENT': 'BSBA-MKTGMGT',
+        'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN FINANCIAL MANAGEMENT': 'BSBA-FINMGT',
+        'BACHELOR OF SCIENCE IN COMPUTER SCIENCE': 'BSCS',
+    }
+    top_program_abbrev = None
+    if top_program:
+        top_program_upper = (top_program or '').strip().upper()
+        top_program_abbrev = PROGRAM_ABBREVIATIONS_CARD.get(top_program_upper, top_program)
 
     # Academic year distribution (already ordered)
     academic_year_labels = list(enrolled_counts.keys())
@@ -154,7 +172,24 @@ def adminDash(request):
         .annotate(count=Count('program_first_choice'))
         .order_by('-count')
     )
-    program_labels = [p['program_first_choice'] for p in program_popularity]
+    # Map full program names to abbreviations for graph labels
+    PROGRAM_ABBREVIATIONS = {
+        'BACHELOR OF SCIENCE IN NURSING': 'BSN',
+        'BACHELOR OF SCIENCE IN CIVIL ENGINEERING': 'BSCE',
+        'BACHELOR OF SCIENCE IN MEDICAL TECHNOLOGY': 'BSMT',
+        'BACHELOR OF SCIENCE IN PSYCHOLOGY': 'BSPSY',
+        'BACHELOR OF SCIENCE IN ACCOUNTANCY': 'BSA',
+        'BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY': 'BSIT',
+        'BACHELOR OF SCIENCE IN TOURISM MANAGEMENT': 'BSTM',
+        'BACHELOR OF SCIENCE IN ARCHITECTURE': 'BSARCH',
+        'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN MARKETING MANAGEMENT': 'BSBA-MKTGMGT',
+        'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN FINANCIAL MANAGEMENT': 'BSBA-FINMGT',
+        'BACHELOR OF SCIENCE IN COMPUTER SCIENCE': 'BSCS',
+    }
+    program_labels = [
+        PROGRAM_ABBREVIATIONS.get((p['program_first_choice'] or '').strip().upper(), p['program_first_choice'])
+        for p in program_popularity
+    ]
     program_data = [p['count'] for p in program_popularity]
 
     # Admission success rate using entire database (all years)
@@ -183,6 +218,7 @@ def adminDash(request):
         'female_enrolled_percent': female_enrolled_percent,
         'top_program': top_program,
         'top_program_count': top_program_count,
+    'top_program_abbrev': top_program_abbrev,
         'academic_year_labels': academic_year_labels,
         'academic_year_data': academic_year_data,
         'program_labels': program_labels,

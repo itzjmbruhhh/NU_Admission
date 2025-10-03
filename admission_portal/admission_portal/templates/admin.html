@@ -78,7 +78,13 @@
             <div class="summary-card info">
               <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
               <div class="card-content">
-                <h2>{{ top_program|default:'N/A' }}</h2>
+                <h2>
+                  {% if top_program_abbrev %}
+                    <span title="{{ top_program }}">{{ top_program_abbrev }}</span>
+                  {% else %}
+                    {{ top_program|default:'N/A' }}
+                  {% endif %}
+                </h2>
                 <p>Top Program</p>
                 <span class="trend up">
                   <i class="fas fa-star"></i> Most popular
