@@ -45,7 +45,14 @@ class StudentResource(resources.ModelResource):
     student_type = fields.Field(attribute="student_type", column_name="Student Type")
     last_school_attended = fields.Field(attribute="last_school_attended", column_name="Last School Attended")
     school_type = fields.Field(attribute="school_type", column_name="School Type")
-    enrolled = fields.Field(attribute="enrolled", column_name="Enrolled")
+    # New: import/export of enrollment chance percentage (float). Accepts raw number or string with '%'.
+    enrollment_chance = fields.Field(attribute="enrollment_chance", column_name="Enrollment Chance")
+
+    # NOTE: Removed the 'enrolled' mapping because there is no 'enrolled' field
+    # on the Student model (status is a @property). If you need to export a
+    # status column, implement a dehydrate method like below (uncomment):
+    # def dehydrate_status(self, obj):
+    #     return obj.status
 
     def clean_birth_date(self, value):
         """Convert Excel value to Python date."""
@@ -61,6 +68,32 @@ class StudentResource(resources.ModelResource):
 
     def before_import_row(self, row, **kwargs):
         row["Birth Date"] = self.clean_birth_date(row.get("Birth Date"))
+        # Normalize Enrollment Chance -> float or None
+        raw_chance = row.get("Enrollment Chance")
+        row["Enrollment Chance"] = self.clean_enrollment_chance(raw_chance)
+
+    def clean_enrollment_chance(self, value):
+        """Convert Enrollment Chance column to float (percentage 0..100).
+
+        Accepts formats like:
+          72.5
+          "72.5"
+          "72.5%"
+          "72%"
+        Blank / 'N/A' / None -> None.
+        Invalid strings are coerced to None to avoid import failure.
+        """
+        if value in (None, "", "N/A", "NA", "null", "None"):
+            return None
+        if isinstance(value, (int, float)):
+            return float(value)
+        s = str(value).strip()
+        if s.endswith('%'):
+            s = s[:-1].strip()
+        try:
+            return float(s)
+        except ValueError:
+            return None
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
         # Skip rows with missing Student ID

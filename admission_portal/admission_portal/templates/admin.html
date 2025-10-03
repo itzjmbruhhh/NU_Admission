@@ -23,9 +23,6 @@
             </div>
           </div>
           <nav class="header-nav">
-            <span class="nav-link active"
-              ><i class="fas fa-tachometer-alt"></i> Dashboard</span
-            >
             <span class="nav-link" id="adminName">Welcome, Admin!</span>
           </nav>
         </div>
@@ -81,7 +78,13 @@
             <div class="summary-card info">
               <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
               <div class="card-content">
-                <h2>{{ top_program|default:'N/A' }}</h2>
+                <h2>
+                  {% if top_program_abbrev %}
+                    <span title="{{ top_program }}">{{ top_program_abbrev }}</span>
+                  {% else %}
+                    {{ top_program|default:'N/A' }}
+                  {% endif %}
+                </h2>
                 <p>Top Program</p>
                 <span class="trend up">
                   <i class="fas fa-star"></i> Most popular
@@ -146,7 +149,7 @@
                     <input type="text" name="student_id" value="{{ request.GET.student_id }}" placeholder="Enter Student ID" style="height:47px;padding:4px 8px;font-size:15px;" />
                   </div>
                   <div class="filter-group">
-                    <label>Program</label>
+                    <label>Program (First Choice)</label>
                     <select name="program">
                       <option value="">All Programs</option>
                       {% for p in programs %}
@@ -172,16 +175,26 @@
                       {% endfor %}
                     </select>
                   </div>
-                  <div class="filter-group">
+                  <div class="filter-group enrollment">
+                    <div></div>
                     <label>Enrollment Chance</label>
                     <select name="enroll_chance">
                       <option value="">All</option>
-                      <option value="lt_40" {% if selected_enroll_chance == 'lt_40' %}selected{% endif %}>&lt; 40%</option>
-                      <option value="gte_40" {% if selected_enroll_chance == 'gte_40' %}selected{% endif %}>&ge; 40%</option>
-                      <option value="gte_70" {% if selected_enroll_chance == 'gte_70' %}selected{% endif %}>&ge; 70%</option>
-                      <option value="gte_90" {% if selected_enroll_chance == 'gte_90' %}selected{% endif %}>&ge; 90%</option>
+                      <option value="lt_40" {% if selected_enroll_chance == "lt_40" %}selected{% endif %}>Below 40%</option>
+                      <option value="gte_40" {% if selected_enroll_chance == "gte_40" %}selected{% endif %}>40% and above</option>
+                      <option value="gte_70" {% if selected_enroll_chance == "gte_70" %}selected{% endif %}>70% and above</option>
+                      <option value="gte_90" {% if selected_enroll_chance == "gte_90" %}selected{% endif %}>90% and above</option>
                     </select>
                   </div>
+                  <div class="filter-group student-type">
+                    <label>Student Type</label>
+                    <select name="student_type">
+                      <option value="">All Types</option>
+                      <option value="Full-time Student" {% if selected_student_type == "Full-time Student" %}selected{% endif %}>Full-time Student</option>
+                      <option value="Working Student" {% if selected_student_type == "Working Student" %}selected{% endif %}>Working Student</option>
+                    </select>
+                  </div>
+            
                 </div>
                 <br>
                   <div class="filter-actions">
@@ -201,119 +214,164 @@
               <h3><i class="fas fa-table"></i> Student Records</h3>
             </div>
 
-            <!-- Student Table -->
             <div class="table-container">
-              <table id="studentTable" class="modern-table">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Student ID</th>
-                    <th>Name</th>
-                    <th>Program</th>
-                    <th>Enrollment Chance</th>
-                    <th>Status</th>
-                    <th>School Year</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for student in students %}
-                  <tr>
-                    <td></td>
-                    <td>{{ student.student_id }}</td>
-                    <td>{{ student.name }}</td>
-                    <td>
-                      {% if student.program_first_choice == 'Bachelor of Science in Psychology' %}
-                        <span class="program-badge psy">BPSY</span>
-                      {% elif student.program_first_choice == 'Bachelor of Science in Nursing' %}
-                        <span class="program-badge nursing">BSN</span>
-                      {% elif student.program_first_choice == 'Bachelor of Science in Medical Technology' %}
-                        <span class="program-badge mt">BSMT</span>
-                      {% elif student.program_first_choice == 'Bachelor of Science in Information Technology' %}
-                        <span class="program-badge bsit">BSIT</span>
-                      {% elif student.program_first_choice == 'Bachelor of Science in Computer Science' %}
-                        <span class="program-badge bscs">BSCS</span>
-                      {% elif student.program_first_choice == 'Bachelor of Science in Civil Engineering' %}
-                        <span class="program-badge ce">BSCE</span>
-                      {% elif student.program_first_choice == 'Bachelor of Science in Architecture' %}
-                        <span class="program-badge arch">BSARCH</span>
-                      {% elif student.program_first_choice == 'Bachelor of Science in Tourism Management' %}
-                        <span class="program-badge tm">BSTM</span>
-                      {% elif student.program_first_choice == 'Bachelor of Science in Business Administration Major in Marketing Management' %}
-                        <span class="program-badge business">BSBA-MktgMgt</span>
-                      {% elif student.program_first_choice == 'Bachelor of Science in Business Administration Major in Financial Management' %}
-                        <span class="program-badge business">BSBA-FinMgt</span>
-                      {% elif student.program_first_choice == 'Bachelor of Science in Accountancy' %}
-                        <span class="program-badge acc">BSA</span>
-                      {% else %}
-                        <span class="program-badge">{{ student.program_first_choice }}</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if student.enrollment_chance is not None %}
-                        <span class="chance-badge high">{{ student.enrollment_chance|floatformat:2 }}%</span>
-                      {% else %}
-                        <span class="chance-badge" style="background:#ccc;color:#222;">N/A</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if student.status == 'Enrolled' %}
-                        <span class="status-badge enrolled" style="background: #059669; color: #fff">Enrolled</span>
-                      {% else %}
-                        <span class="status-badge not-enrolled" style="background: #e65959; color: #fff">Not Enrolled</span>
-                      {% endif %}
-                    </td>
-                    <td>{{ student.school_year }}</td>
-                    <td class="action-buttons">
-                      <a class="btn-icon view" href="{% url 'student_detail' student.pk %}">
-                        <i class="fas fa-eye"></i>
-                      </a>
-                    </td>
-                  </tr>
-                  {% empty %}
-                  <tr>
-                    <td colspan="9">No student records found.</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+  <table id="studentTable" class="modern-table">
+    <thead>
+      <tr>
+        <th>Student ID</th>
+        <th>Full Name</th>        
+        <th>Prefix</th>
+        <th>Program (First Choice)</th>
+        <th>Program (Second Choice)</th>
+        <th>Enrollment Chance</th>
+        <th>Status</th>
+        <th>School Year</th>
+        <th>School Term</th>
+        <th>Campus Code</th>
+        <th>Entry Level</th>
+        <th>Age at Enrollment</th>
+        <th>Birth Date</th>
+        <th>Birth Place</th>
+        <th>Birth City</th>
+        <th>Gender</th>
+        <th>Citizen of</th>
+        <th>Religion</th>
+        <th>Civil Status</th>
+  <th>Complete Current Address</th>
+  <th>Complete Permanent Address</th>
+        <th>Disability</th>
+        <th>Indigenous</th>
+        <th>Birth Country</th>
+        <th>Requirement Agreement</th>
+        <th>Student Type</th>
+        <th>Last School Attended</th>
+        <th>School Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+      <tr>
+        <td>{{ student.student_id }}</td>
+        <td>{{ student.name }}</td>   
+        <td>{{ student.prefix }}</td>
+        <td>
+          {% with pf=student.program_first_choice|default_if_none:""|upper %}
+            {% if pf == 'BACHELOR OF SCIENCE IN NURSING' %}<span class="program-badge bsn" title="{{ student.program_first_choice }}">BSN</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN CIVIL ENGINEERING' %}<span class="program-badge bsce" title="{{ student.program_first_choice }}">BSCE</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN MEDICAL TECHNOLOGY' %}<span class="program-badge bsmt" title="{{ student.program_first_choice }}">BSMT</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN PSYCHOLOGY' %}<span class="program-badge bspsy" title="{{ student.program_first_choice }}">BSPSY</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN ACCOUNTANCY' %}<span class="program-badge bsa" title="{{ student.program_first_choice }}">BSA</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY' %}<span class="program-badge bsit" title="{{ student.program_first_choice }}">BSIT</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN TOURISM MANAGEMENT' %}<span class="program-badge bstm" title="{{ student.program_first_choice }}">BSTM</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN ARCHITECTURE' %}<span class="program-badge bsarch" title="{{ student.program_first_choice }}">BSARCH</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN MARKETING MANAGEMENT' %}<span class="program-badge bsba-mktgmgt" title="{{ student.program_first_choice }}">BSBA-MKTGMGT</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN FINANCIAL MANAGEMENT' %}<span class="program-badge bsba-finmgt" title="{{ student.program_first_choice }}">BSBA-FINMGT</span>
+            {% elif pf == 'BACHELOR OF SCIENCE IN COMPUTER SCIENCE' %}<span class="program-badge bscs" title="{{ student.program_first_choice }}">BSCS</span>
+            {% else %}<span class="program-badge other" title="{{ student.program_first_choice }}">{{ student.program_first_choice }}</span>{% endif %}
+          {% endwith %}
+        </td>
+        <td>
+          {% with ps=student.program_second_choice|default_if_none:""|upper %}
+            {% if not ps %}{% comment %}Empty second choice{% endcomment %}{% elif ps == 'BACHELOR OF SCIENCE IN NURSING' %}<span class="program-badge bsn" title="{{ student.program_second_choice }}">BSN</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN CIVIL ENGINEERING' %}<span class="program-badge bsce" title="{{ student.program_second_choice }}">BSCE</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN MEDICAL TECHNOLOGY' %}<span class="program-badge bsmt" title="{{ student.program_second_choice }}">BSMT</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN PSYCHOLOGY' %}<span class="program-badge bspsy" title="{{ student.program_second_choice }}">BSPSY</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN ACCOUNTANCY' %}<span class="program-badge bsa" title="{{ student.program_second_choice }}">BSA</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY' %}<span class="program-badge bsit" title="{{ student.program_second_choice }}">BSIT</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN TOURISM MANAGEMENT' %}<span class="program-badge bstm" title="{{ student.program_second_choice }}">BSTM</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN ARCHITECTURE' %}<span class="program-badge bsarch" title="{{ student.program_second_choice }}">BSARCH</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN MARKETING MANAGEMENT' %}<span class="program-badge bsba-mktgmgt" title="{{ student.program_second_choice }}">BSBA-MKTGMGT</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN FINANCIAL MANAGEMENT' %}<span class="program-badge bsba-finmgt" title="{{ student.program_second_choice }}">BSBA-FINMGT</span>
+            {% elif ps == 'BACHELOR OF SCIENCE IN COMPUTER SCIENCE' %}<span class="program-badge bscs" title="{{ student.program_second_choice }}">BSCS</span>
+            {% else %}<span class="program-badge other" title="{{ student.program_second_choice }}">Other</span>{% endif %}
+          {% endwith %}
+        </td>
+        <td>
+          {% if student.enrollment_chance is not None %}
+            <span class="enrollment-chance good">{{ student.enrollment_chance|floatformat:2 }}%</span>
+          {% else %}
+            <span class="enrollment-chance na">N/A</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if student.status == 'Enrolled' %}
+            <span class="status-badge enrolled">Enrolled</span>
+          {% else %}
+            <span class="status-badge not-enrolled">Not Enrolled</span>
+          {% endif %}
+        </td>
+        <td>{{ student.school_year }}</td>
+        <td>{{ student.school_term }}</td>
+        <td>{{ student.campus_code }}</td>
+        <td>{{ student.entry_level }}</td>
+        <td>{{ student.age_at_enrollment }}</td>
+        <td>{{ student.birth_date }}</td>
+        <td>{{ student.birth_place }}</td>
+        <td>{{ student.birth_city }}</td>
+        <td>{{ student.gender }}</td>
+        <td>{{ student.citizen_of }}</td>
+        <td>{{ student.religion }}</td>
+        <td>{{ student.civil_status }}</td>
+        <td class="address-cell">
+          {% with parts="" %}
+            {% firstof student.current_street "" %}{% if student.current_brgy %}, {{ student.current_brgy }}{% endif %}{% if student.current_city %}, {{ student.current_city }}{% endif %}{% if student.current_province %}, {{ student.current_province }}{% endif %}{% if student.current_region %}, {{ student.current_region }}{% endif %}{% if student.current_postal_code %} {{ student.current_postal_code }}{% endif %}
+          {% endwith %}
+        </td>
+        <td class="address-cell">
+          {% with parts="" %}
+            {% firstof student.permanent_street "" %}{% if student.permanent_brgy %}, {{ student.permanent_brgy }}{% endif %}{% if student.permanent_city %}, {{ student.permanent_city }}{% endif %}{% if student.permanent_province %}, {{ student.permanent_province }}{% endif %}{% if student.permanent_region %}, {{ student.permanent_region }}{% endif %}{% if student.permanent_country %}, {{ student.permanent_country }}{% endif %}{% if student.permanent_postal_code %} {{ student.permanent_postal_code }}{% endif %}
+          {% endwith %}
+        </td>
+        <td>
+          {% if student.disability|stringformat:"s" == "1" %}Disabled{% else %}None{% endif %}
+        </td>
+        <td>
+          {% if student.indigenous|stringformat:"s" == "1" %}Indigenous{% else %}None{% endif %}
+        </td>
+        <td>{{ student.birth_country }}</td>
+        <td>
+          {% if student.requirement_agreement|stringformat:"s" == "1" %}Yes{% else %}No{% endif %}
+        </td>
+        <td>{{ student.student_type }}</td>
+        <td>{{ student.last_school_attended }}</td>
+        <td>{{ student.school_type }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="45">No student records found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
-              <div id="noResults" class="no-results" style="display: none">
-                <i class="fas fa-search"></i>
-                <p>No results found for your search criteria.</p>
-              </div>
-            </div>
 
-            <!-- Pagination -->
-            <div class="pagination">
-              {% if students.has_previous %}
-              <a
-                class="btn secondary"
-                href="?{% if selected_program %}program={{ selected_program }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}{% if selected_school_year %}school_year={{ selected_school_year }}&{% endif %}{% if selected_enroll_chance %}enroll_chance={{ selected_enroll_chance }}&{% endif %}{% if request.GET.student_id %}student_id={{ request.GET.student_id }}&{% endif %}page={{ students.previous_page_number }}"
-              >
-                <i class="fas fa-chevron-left"></i> Previous
-              </a>
-              {% else %}
-              <span class="btn secondary" disabled>
-                <i class="fas fa-chevron-left"></i> Previous
-              </span>
-              {% endif %}
-              <span class="page-info">Page {{ students.number }} of {{ students.paginator.num_pages}}</span>
-              {% if students.has_next %}
-              <a
-                class="btn secondary"
-                href="?{% if selected_program %}program={{ selected_program }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}{% if selected_school_year %}school_year={{ selected_school_year }}&{% endif %}{% if selected_enroll_chance %}enroll_chance={{ selected_enroll_chance }}&{% endif %}{% if request.GET.student_id %}student_id={{ request.GET.student_id }}&{% endif %}page={{ students.next_page_number }}"
-              >
-                Next <i class="fas fa-chevron-right"></i>
-              </a>
-              {% else %}
-              <span class="btn secondary" disabled>
-                Next <i class="fas fa-chevron-right"></i>
-              </span>
-              {% endif %}
-            </div>
-          </section>
-        </div>
+
+       <!-- Pagination -->
+<div class="pagination">
+  {% if students.has_previous %}
+  <a class="btn secondary" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ students.previous_page_number }}">
+
+    <i class="fas fa-chevron-left"></i> Previous
+  </a>
+  {% else %}
+  <span class="btn secondary" disabled>
+    <i class="fas fa-chevron-left"></i> Previous
+  </span>
+  {% endif %}
+  <span class="page-info">Page {{ students.number }} of {{ students.paginator.num_pages}}</span>
+  {% if students.has_next %}
+  <a class="btn secondary" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ students.next_page_number }}">
+
+    Next <i class="fas fa-chevron-right"></i>
+  </a>
+  {% else %}
+  <span class="btn secondary" disabled>
+    Next <i class="fas fa-chevron-right"></i>
+  </span>
+  {% endif %}
+</div>
+     
 
         </div>
       </main>
