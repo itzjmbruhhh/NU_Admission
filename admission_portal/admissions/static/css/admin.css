@@ -187,8 +187,7 @@ body {
 .input-icon {
     position: absolute;
     left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 55%;
     color: #6B7280;
     font-size: 1.2rem;
     pointer-events: none;
