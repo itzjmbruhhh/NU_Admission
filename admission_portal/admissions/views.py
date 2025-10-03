@@ -46,6 +46,7 @@ def adminDash(request):
     school_year = request.GET.get('school_year')
     status = request.GET.get('status')
     enroll_chance = request.GET.get('enroll_chance')
+    student_type = request.GET.get('student_type')
 
     # Order by latest registration (most recent first)
     students = Student.objects.all().order_by('-id')
@@ -69,6 +70,10 @@ def adminDash(request):
         students = students.filter(enrollment_chance__gte=70)
     elif enroll_chance == 'gte_90':
         students = students.filter(enrollment_chance__gte=90)
+
+    # ✅ Filter by student type
+    if student_type:
+        students = students.filter(student_type=student_type)
 
    # Pagination
     paginator = Paginator(students, 10)
@@ -143,6 +148,7 @@ def adminDash(request):
         'selected_status': status,
         'selected_school_year': school_year,
         'selected_enroll_chance': enroll_chance,
+        'selected_student_type': student_type,
         'current_enrolled_count': current_enrolled_count,
         'current_year': current_year,
         'current_term': current_term,

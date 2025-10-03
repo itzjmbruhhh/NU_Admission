@@ -172,16 +172,26 @@
                       {% endfor %}
                     </select>
                   </div>
-                  <div class="filter-group">
+                  <div class="filter-group enrollment">
+                    <div></div>
                     <label>Enrollment Chance</label>
                     <select name="enroll_chance">
                       <option value="">All</option>
-                      <option value="lt_40" {% if selected_enroll_chance == 'lt_40' %}selected{% endif %}>&lt; 40%</option>
-                      <option value="gte_40" {% if selected_enroll_chance == 'gte_40' %}selected{% endif %}>&ge; 40%</option>
-                      <option value="gte_70" {% if selected_enroll_chance == 'gte_70' %}selected{% endif %}>&ge; 70%</option>
-                      <option value="gte_90" {% if selected_enroll_chance == 'gte_90' %}selected{% endif %}>&ge; 90%</option>
+                      <option value="lt_40" {% if selected_enroll_chance == "lt_40" %}selected{% endif %}>Below 40%</option>
+                      <option value="gte_40" {% if selected_enroll_chance == "gte_40" %}selected{% endif %}>40% and above</option>
+                      <option value="gte_70" {% if selected_enroll_chance == "gte_70" %}selected{% endif %}>70% and above</option>
+                      <option value="gte_90" {% if selected_enroll_chance == "gte_90" %}selected{% endif %}>90% and above</option>
                     </select>
                   </div>
+                  <div class="filter-group student-type">
+                    <label>Student Type</label>
+                    <select name="student_type">
+                      <option value="">All Types</option>
+                      <option value="Full-time Student" {% if selected_student_type == "Full-time Student" %}selected{% endif %}>Full-time Student</option>
+                      <option value="Working Student" {% if selected_student_type == "Working Student" %}selected{% endif %}>Working Student</option>
+                    </select>
+                  </div>
+            
                 </div>
                 <br>
                   <div class="filter-actions">
@@ -313,7 +323,8 @@
        <!-- Pagination -->
 <div class="pagination">
   {% if students.has_previous %}
-  <a class="btn secondary" href="?page={{ students.previous_page_number }}">
+  <a class="btn secondary" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ students.previous_page_number }}">
+
     <i class="fas fa-chevron-left"></i> Previous
   </a>
   {% else %}
@@ -323,7 +334,8 @@
   {% endif %}
   <span class="page-info">Page {{ students.number }} of {{ students.paginator.num_pages}}</span>
   {% if students.has_next %}
-  <a class="btn secondary" href="?page={{ students.next_page_number }}">
+  <a class="btn secondary" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ students.next_page_number }}">
+
     Next <i class="fas fa-chevron-right"></i>
   </a>
   {% else %}
