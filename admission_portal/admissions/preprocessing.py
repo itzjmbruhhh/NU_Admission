@@ -276,7 +276,7 @@ def preprocess_student_data(student_dict):
     data['second_choice_other'] = 1 if second_faculty == 'OTHER' else 0
     data['diff_faculty'] = 1 if (first_faculty != second_faculty and second_faculty != 'OTHER') else 0
     
-    # Entry level processing
+    # Entry level processing    
     entry_level = data.get('Entry Level', 'FRESHMAN')
     
     # Group small categories
