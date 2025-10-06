@@ -175,8 +175,7 @@
                       {% endfor %}
                     </select>
                   </div>
-                  <div class="filter-group enrollment">
-                    <div></div>
+                  <div class="filter-group enrollment" style="min-width:180px;">
                     <label>Enrollment Chance</label>
                     <select name="enroll_chance">
                       <option value="">All</option>
@@ -186,7 +185,7 @@
                       <option value="gte_90" {% if selected_enroll_chance == "gte_90" %}selected{% endif %}>90% and above</option>
                     </select>
                   </div>
-                  <div class="filter-group student-type">
+                  <div class="filter-group student-type" style="min-width:180px; align-self: flex-end;">
                     <label>Student Type</label>
                     <select name="student_type">
                       <option value="">All Types</option>
