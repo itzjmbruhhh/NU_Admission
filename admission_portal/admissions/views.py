@@ -4,6 +4,7 @@ def student_detail(request, pk):
     return render(request, 'student_detail.html', {'student': student})
 # admissions/views.py
 from django.shortcuts import render, redirect
+from django.db.models import Q
 from .models import Student
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
@@ -20,14 +21,39 @@ def loginAdmin(request):
     return render(request, 'login.html')
 
 def adminDash(request):
-    # Admission success rate (enrolled vs not enrolled)
-    admission_labels = ["Enrolled", "Not Enrolled"]
-    admission_data = [
-        Student.objects.exclude(student_id__isnull=True).exclude(student_id__exact='').count(),
-        Student.objects.filter(student_id__isnull=True).count() + Student.objects.filter(student_id__exact='').count()
-    ]
-    # --- Male/Female enrolled counts and percentages ---
+    # Base queryset of enrolled students (student_id present & non-empty)
     enrolled_students = Student.objects.exclude(student_id__isnull=True).exclude(student_id__exact='')
+
+    # Derive list of school years that have at least one enrolled student
+    years_with_enrollment_raw = enrolled_students.values_list('school_year', flat=True).distinct()
+    # Filter out null/blank and coerce to ints where possible
+    years_with_enrollment: list[int] = []
+    for y in years_with_enrollment_raw:
+        if y is None:
+            continue
+        y_str = str(y).strip()
+        if not y_str:
+            continue
+        try:
+            years_with_enrollment.append(int(y_str))
+        except ValueError:
+            # Ignore non-numeric year values
+            continue
+    years_with_enrollment = sorted(set(years_with_enrollment))
+
+    # Guard: if no enrolled years yet, fall back to original broad logic
+    if years_with_enrollment:
+        min_year = years_with_enrollment[0]
+        max_year = years_with_enrollment[-1]
+    else:
+        min_year = max_year = None
+
+    # Latest enrolled student for current year/term context
+    latest_enrolled_student = enrolled_students.order_by('-school_year', '-school_term').first()
+    current_year = latest_enrolled_student.school_year if latest_enrolled_student else None
+    current_term = latest_enrolled_student.school_term if latest_enrolled_student else None
+
+    # Male / Female counts restricted to currently enrolled population
     male_enrolled_count = enrolled_students.filter(gender__iexact='Male').count()
     female_enrolled_count = enrolled_students.filter(gender__iexact='Female').count()
     total_enrolled = male_enrolled_count + female_enrolled_count
@@ -35,8 +61,7 @@ def adminDash(request):
         male_enrolled_percent = (male_enrolled_count / total_enrolled) * 100
         female_enrolled_percent = (female_enrolled_count / total_enrolled) * 100
     else:
-        male_enrolled_percent = 0
-        female_enrolled_percent = 0
+        male_enrolled_percent = female_enrolled_percent = 0
     from datetime import date
     student_id = request.GET.get('student_id')
     programs = Student.objects.values_list('program_first_choice', flat=True).distinct()
@@ -80,36 +105,29 @@ def adminDash(request):
     page_number = request.GET.get('page')
     students_page = paginator.get_page(page_number)
     
-    # --- Dashboard summary logic ---
-    # Get current year/term (assume latest school_year and school_term in DB)
-    latest_student = Student.objects.order_by('-school_year', '-school_term').first()
-    current_year = latest_student.school_year if latest_student else None
-    current_term = latest_student.school_term if latest_student else None
-
-    # Get enrolled counts per school year for current term
-    enrolled_qs = Student.objects.filter(
-        school_term=current_term
-    ).exclude(student_id__isnull=True).exclude(student_id__exact='')
-    # Get counts per year, sorted
+    # --- Dashboard summary & academic year distribution logic ---
     from collections import OrderedDict
-    enrolled_counts = {}
-    for y in school_years:
-        count = enrolled_qs.filter(school_year=y).count()
-        enrolled_counts[str(y)] = count
-    # Sort by year
-    enrolled_counts = OrderedDict(sorted(enrolled_counts.items(), key=lambda x: x[0]))
-    # Get current and previous year counts
-    current_enrolled_count = enrolled_counts.get(str(current_year), 0)
+    enrolled_counts = OrderedDict()
+
+    if current_term is not None and min_year is not None and max_year is not None:
+        # Restrict to the contiguous numeric range from min_year to max_year
+        term_filtered = enrolled_students.filter(school_term=current_term)
+        for y in range(min_year, max_year + 1):
+            count = term_filtered.filter(school_year=str(y)).count()
+            enrolled_counts[str(y)] = count
+    else:
+        # Fallback: no enrolled students yet. Provide empty counts keyed by distinct school_years.
+        for y in school_years:
+            enrolled_counts[str(y)] = 0
+
+    current_enrolled_count = enrolled_counts.get(str(current_year), 0) if current_year else 0
     years_sorted = list(enrolled_counts.keys())
-    if len(years_sorted) > 1:
+    if current_year and str(current_year) in years_sorted:
         idx = years_sorted.index(str(current_year))
         if idx > 0:
-            last_year = years_sorted[idx-1]
-            last_enrolled_count = enrolled_counts[last_year]
-            if last_enrolled_count:
-                percent_change = ((current_enrolled_count - last_enrolled_count) / last_enrolled_count) * 100
-            else:
-                percent_change = 0
+            prev_year_key = years_sorted[idx - 1]
+            prev_val = enrolled_counts.get(prev_year_key, 0)
+            percent_change = ((current_enrolled_count - prev_val) / prev_val * 100) if prev_val else 0
         else:
             percent_change = 0
     else:
@@ -125,19 +143,60 @@ def adminDash(request):
     )
     top_program = top_program_data['program_first_choice'] if top_program_data else None
     top_program_count = top_program_data['count'] if top_program_data else 0
+    # Abbreviation for top program (reuse mapping) for summary card display
+    PROGRAM_ABBREVIATIONS_CARD = {
+        'BACHELOR OF SCIENCE IN NURSING': 'BSN',
+        'BACHELOR OF SCIENCE IN CIVIL ENGINEERING': 'BSCE',
+        'BACHELOR OF SCIENCE IN MEDICAL TECHNOLOGY': 'BSMT',
+        'BACHELOR OF SCIENCE IN PSYCHOLOGY': 'BSPSY',
+        'BACHELOR OF SCIENCE IN ACCOUNTANCY': 'BSA',
+        'BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY': 'BSIT',
+        'BACHELOR OF SCIENCE IN TOURISM MANAGEMENT': 'BSTM',
+        'BACHELOR OF SCIENCE IN ARCHITECTURE': 'BSARCH',
+        'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN MARKETING MANAGEMENT': 'BSBA-MKTGMGT',
+        'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN FINANCIAL MANAGEMENT': 'BSBA-FINMGT',
+        'BACHELOR OF SCIENCE IN COMPUTER SCIENCE': 'BSCS',
+    }
+    top_program_abbrev = None
+    if top_program:
+        top_program_upper = (top_program or '').strip().upper()
+        top_program_abbrev = PROGRAM_ABBREVIATIONS_CARD.get(top_program_upper, top_program)
 
-    # Academic year distribution for enrolled students
+    # Academic year distribution (already ordered)
     academic_year_labels = list(enrolled_counts.keys())
     academic_year_data = list(enrolled_counts.values())
 
-    # Program popularity for pie chart
+    # Program popularity for pie chart (based on all currently enrolled students)
     program_popularity = (
         enrolled_students.values('program_first_choice')
         .annotate(count=Count('program_first_choice'))
         .order_by('-count')
     )
-    program_labels = [p['program_first_choice'] for p in program_popularity]
+    # Map full program names to abbreviations for graph labels
+    PROGRAM_ABBREVIATIONS = {
+        'BACHELOR OF SCIENCE IN NURSING': 'BSN',
+        'BACHELOR OF SCIENCE IN CIVIL ENGINEERING': 'BSCE',
+        'BACHELOR OF SCIENCE IN MEDICAL TECHNOLOGY': 'BSMT',
+        'BACHELOR OF SCIENCE IN PSYCHOLOGY': 'BSPSY',
+        'BACHELOR OF SCIENCE IN ACCOUNTANCY': 'BSA',
+        'BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY': 'BSIT',
+        'BACHELOR OF SCIENCE IN TOURISM MANAGEMENT': 'BSTM',
+        'BACHELOR OF SCIENCE IN ARCHITECTURE': 'BSARCH',
+        'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN MARKETING MANAGEMENT': 'BSBA-MKTGMGT',
+        'BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION MAJOR IN FINANCIAL MANAGEMENT': 'BSBA-FINMGT',
+        'BACHELOR OF SCIENCE IN COMPUTER SCIENCE': 'BSCS',
+    }
+    program_labels = [
+        PROGRAM_ABBREVIATIONS.get((p['program_first_choice'] or '').strip().upper(), p['program_first_choice'])
+        for p in program_popularity
+    ]
     program_data = [p['count'] for p in program_popularity]
+
+    # Admission success rate using entire database (all years)
+    total_enrolled_all_years = Student.objects.exclude(student_id__isnull=True).exclude(student_id__exact='').count()
+    total_not_enrolled_all_years = Student.objects.filter(Q(student_id__isnull=True) | Q(student_id__exact='')).count()
+    admission_labels = ["Enrolled", "Not Enrolled"]
+    admission_data = [total_enrolled_all_years, total_not_enrolled_all_years]
 
     context = {
         'students': students_page,
@@ -159,6 +218,7 @@ def adminDash(request):
         'female_enrolled_percent': female_enrolled_percent,
         'top_program': top_program,
         'top_program_count': top_program_count,
+    'top_program_abbrev': top_program_abbrev,
         'academic_year_labels': academic_year_labels,
         'academic_year_data': academic_year_data,
         'program_labels': program_labels,
