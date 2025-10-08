@@ -518,6 +518,11 @@
   background: var(--warning);
   color: white;
 }
+.btn-mint {
+  background: linear-gradient(90deg, #a7f3d0 0%, #34d399 100%);
+  color: #042022;
+  border: 1px solid rgba(16,185,129,0.12);
+}
 .btn.danger {
   background: var(--danger);
   color: white;
@@ -541,6 +546,83 @@
 .btn.secondary:hover {
   background: #475569;
 }
+
+/* Percentage dropdown list and items (moved from inline styles) */
+/* Percentage dropdown list and items */
+#percentageList {
+  max-height: 300px;
+  overflow: auto;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 6px;
+  color: #374151;
+  font-size: 11px; /* smaller to fully fit program text */
+}
+
+.percentage-top-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 6px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(167,243,208,0.12), rgba(52,211,153,0.06));
+  border: 1px solid rgba(16,185,129,0.08);
+  font-weight: 700;
+  color: #04403a;
+}
+
+.percentage-top-item small {
+  font-weight: 600;
+  color: #065f46;
+  opacity: 0.9;
+}
+
+.percentage-item {
+  display: flex;
+  flex-direction: column; /* stack label above value and center */
+  justify-content: center;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.percentage-item .label {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.percentage-item .value {
+  color: #065f46;
+  font-weight: 700;
+  font-size: 11px;
+  text-align: center;
+}
+
+.percentage-top-item { padding: 6px 6px; flex-direction: column; align-items: center; text-align: center; }
+.percentage-top-item > div:last-child { font-size: 12px; font-weight: 800; color: #064e3b; margin-top:4px }
+
+/* Hover/focus states to make items stand out */
+.percentage-item:hover, .percentage-item:focus {
+  background: rgba(6,95,70,0.03);
+  transform: translateY(-1px);
+}
+.percentage-top-item:hover, .percentage-top-item:focus {
+  box-shadow: 0 6px 18px rgba(6,95,70,0.06);
+}
+
+/* small circular color dots used in lists */
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-sm { width: 10px; height: 10px; }
 
 /* ==== Student Records Table ==== */
 .table-container {
