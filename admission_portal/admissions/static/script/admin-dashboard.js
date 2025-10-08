@@ -93,11 +93,11 @@ document.addEventListener("DOMContentLoaded", function () {
   for (let i = 0; i < programLabels.length; i++) {
     pieColors.push(programColors[i % programColors.length]);
   }
-  // Set chart width larger
+  // Set chart width larger and keep instance for updates
   const programChartCanvas = document.getElementById("programChart");
   programChartCanvas.width = 600;
   programChartCanvas.height = 400;
-  new Chart(programChartCanvas.getContext("2d"), {
+  window.programChartInstance = new Chart(programChartCanvas.getContext("2d"), {
     type: "pie",
     data: {
       labels: programLabels,
@@ -123,6 +123,34 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     },
   });
+
+  // Helper to compute top N entries from labels+data
+  function getTopN(labels, data, n) {
+    // build array of {label, value}
+    const arr = labels.map((l, i) => ({ label: l, value: Number(data[i]) || 0 }));
+    arr.sort((a, b) => b.value - a.value);
+    return arr.slice(0, n);
+  }
+
+  // Pie filter handling (Top 5 / Top 10)
+  const pieFilter = document.getElementById('pieFilter');
+  if (pieFilter) {
+    pieFilter.addEventListener('change', function () {
+      const val = this.value;
+      if (val === 'all') {
+        window.programChartInstance.data.labels = programLabels;
+        window.programChartInstance.data.datasets[0].data = programData;
+        window.programChartInstance.data.datasets[0].backgroundColor = pieColors;
+      } else if (val === 'top5' || val === 'top10') {
+        const n = val === 'top5' ? 5 : 10;
+        const top = getTopN(programLabels, programData, n);
+        window.programChartInstance.data.labels = top.map((t) => t.label);
+        window.programChartInstance.data.datasets[0].data = top.map((t) => t.value);
+        window.programChartInstance.data.datasets[0].backgroundColor = pieColors.slice(0, top.length);
+      }
+      window.programChartInstance.update();
+    });
+  }
 
   // ==========================
   // Admission Success Rate

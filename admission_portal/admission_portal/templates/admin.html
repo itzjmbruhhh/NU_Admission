@@ -113,8 +113,16 @@
 
             <!-- Program Popularity (Pie with %) -->
             <div class="chart-container medium">
-              <div class="chart-header">
-                <h3><i class="fas fa-book"></i> Program Popularity</h3>
+              <div class="chart-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <h3 style="margin:0"><i class="fas fa-book"></i> Program Popularity</h3>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <label for="pieFilter" style="font-size:14px;margin:0">Show:</label>
+                  <select id="pieFilter" style="padding:6px 8px;font-size:14px">
+                    <option value="all">All Programs</option>
+                    <option value="top5">Top 5 Courses</option>
+                    <option value="top10">Top 10 Courses</option>
+                  </select>
+                </div>
               </div>
               <canvas id="programChart"></canvas>
             </div>
