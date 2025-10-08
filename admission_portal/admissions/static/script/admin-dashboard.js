@@ -132,25 +132,127 @@ document.addEventListener("DOMContentLoaded", function () {
     return arr.slice(0, n);
   }
 
-  // Pie filter handling (Top 5 / Top 10)
-  const pieFilter = document.getElementById('pieFilter');
-  if (pieFilter) {
-    pieFilter.addEventListener('change', function () {
-      const val = this.value;
-      if (val === 'all') {
-        window.programChartInstance.data.labels = programLabels;
-        window.programChartInstance.data.datasets[0].data = programData;
-        window.programChartInstance.data.datasets[0].backgroundColor = pieColors;
-      } else if (val === 'top5' || val === 'top10') {
-        const n = val === 'top5' ? 5 : 10;
-        const top = getTopN(programLabels, programData, n);
-        window.programChartInstance.data.labels = top.map((t) => t.label);
-        window.programChartInstance.data.datasets[0].data = top.map((t) => t.value);
-        window.programChartInstance.data.datasets[0].backgroundColor = pieColors.slice(0, top.length);
-      }
+  // Helper to update the pie chart for top N and include 'Other' slice
+  let currentTopN = null; // null means show all
+  function updatePieForTopN(n) {
+    if (!n) {
+      // show all
+      window.programChartInstance.data.labels = programLabels;
+      window.programChartInstance.data.datasets[0].data = programData;
+      window.programChartInstance.data.datasets[0].backgroundColor = pieColors;
+      currentTopN = null;
       window.programChartInstance.update();
-    });
+      return;
+    }
+    const top = getTopN(programLabels, programData, n);
+    const topLabels = top.map((t) => t.label);
+    const topValues = top.map((t) => t.value);
+    const total = programData.reduce((s, v) => s + (Number(v) || 0), 0);
+    const topSum = topValues.reduce((s, v) => s + v, 0);
+    const other = Math.max(0, total - topSum);
+    const labels = [...topLabels];
+    const values = [...topValues];
+    const colors = pieColors.slice(0, topLabels.length);
+    if (other > 0) {
+      labels.push('Other programs');
+      values.push(other);
+      colors.push('#9ca3af');
+    }
+    window.programChartInstance.data.labels = labels;
+    window.programChartInstance.data.datasets[0].data = values;
+    window.programChartInstance.data.datasets[0].backgroundColor = colors;
+    currentTopN = n;
+    window.programChartInstance.update();
   }
+
+    // --- Top Courses panel population and wiring ---
+    function populateTopCourses(n) {
+      // Prefer dropdown list if available
+      const container = document.getElementById('topCoursesList');
+      if (!container) return;
+      const total = programData.reduce((s, v) => s + (Number(v) || 0), 0);
+      const top = getTopN(programLabels, programData, n);
+      container.innerHTML = '';
+      top.forEach((t, idx) => {
+        const percent = total > 0 ? ((t.value / total) * 100).toFixed(1) : '0.0';
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
+        item.style.padding = '6px 4px';
+        item.style.borderRadius = '6px';
+        item.style.cursor = 'default';
+        item.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:${pieColors[idx]};"></span>
+            <span style="font-weight:600;color:#0f172a">${t.label}</span>
+          </div>
+          <div style="text-align:right;color:#6b7280">${t.value} <small style=\"color:#9ca3af\">(${percent}%)</small></div>
+        `;
+        container.appendChild(item);
+      });
+
+      const topSum = top.reduce((s, x) => s + x.value, 0);
+      const other = total - topSum;
+      if (other > 0) {
+        const percent = total > 0 ? ((other / total) * 100).toFixed(1) : '0.0';
+        const otherItem = document.createElement('div');
+        otherItem.style.display = 'flex';
+        otherItem.style.justifyContent = 'space-between';
+        otherItem.style.alignItems = 'center';
+        otherItem.style.padding = '6px 4px';
+        otherItem.style.borderRadius = '6px';
+        otherItem.style.marginTop = '6px';
+        otherItem.style.borderTop = '1px dashed rgba(0,0,0,0.06)';
+        otherItem.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#9ca3af;"></span>
+            <span style="font-weight:600;color:#0f172a">Other programs</span>
+          </div>
+          <div style="text-align:right;color:#6b7280">${other} <small style=\"color:#9ca3af\">(${percent}%)</small></div>
+        `;
+        container.appendChild(otherItem);
+      }
+    }
+
+    // Wire Top 5 / Top 10 buttons to update pie and dropdown list
+    const top5Btn = document.getElementById('top5Btn');
+    const top10Btn = document.getElementById('top10Btn');
+    if (top5Btn) {
+      top5Btn.addEventListener('click', function () {
+        updatePieForTopN(5);
+        populateTopCourses(5);
+      });
+    }
+    if (top10Btn) {
+      top10Btn.addEventListener('click', function () {
+        updatePieForTopN(10);
+        populateTopCourses(10);
+      });
+    }
+
+    // Populate dropdown list on first paint (so it has content)
+    populateTopCourses(5);
+
+    // Dropdown toggle behavior (if dropdown exists)
+    const topCoursesToggle = document.getElementById('topCoursesToggle');
+    const topCoursesDropdown = document.getElementById('topCoursesDropdown');
+    if (topCoursesToggle && topCoursesDropdown) {
+      topCoursesToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const shown = topCoursesDropdown.style.display === 'block';
+        topCoursesDropdown.style.display = shown ? 'none' : 'block';
+    // refresh content when showing
+    if (!shown) populateTopCourses(currentTopN || 5);
+      });
+
+      // Close on outside click
+      document.addEventListener('click', function (ev) {
+        if (!topCoursesDropdown.contains(ev.target) && ev.target !== topCoursesToggle) {
+          topCoursesDropdown.style.display = 'none';
+        }
+      });
+    }
 
   // ==========================
   // Admission Success Rate

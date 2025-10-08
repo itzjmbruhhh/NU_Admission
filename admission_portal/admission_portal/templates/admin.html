@@ -111,17 +111,27 @@
             {{ academic_year_labels|json_script:"academic-year-labels" }}
             {{ academic_year_data|json_script:"academic-year-data" }}
 
-            <!-- Program Popularity (Pie with %) -->
-            <div class="chart-container medium">
-              <div class="chart-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <!-- Program Popularity (Pie with %) and Top Courses dropdown -->
+            <div class="chart-container medium" style="padding:12px; position:relative;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
                 <h3 style="margin:0"><i class="fas fa-book"></i> Program Popularity</h3>
-                <div style="display:flex;align-items:center;gap:8px">
-                  <label for="pieFilter" style="font-size:14px;margin:0">Show:</label>
-                  <select id="pieFilter" style="padding:6px 8px;font-size:14px">
-                    <option value="all">All Programs</option>
-                    <option value="top5">Top 5 Courses</option>
-                    <option value="top10">Top 10 Courses</option>
-                  </select>
+                <div style="display:flex;align-items:center;gap:12px;position:relative">
+                  <!-- Top Courses dropdown trigger -->
+                  <div style="position:relative;">
+                    <button id="topCoursesToggle" class="btn" style="padding:6px 10px;font-size:13px">Top Courses ▾</button>
+                    <div id="topCoursesDropdown" style="display:none;position:absolute;right:0;top:40px;width:320px;background:#fff;border-radius:8px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 6px 18px rgba(15,23,42,0.08);z-index:60;padding:10px;">
+                      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                        <h4 style="margin:0;font-size:15px;color:#0f172a">Top Courses</h4>
+                        <div style="display:flex;gap:6px;align-items:center">
+                          <button id="top5Btn" class="btn" style="padding:6px 8px;font-size:12px">Top 5</button>
+                          <button id="top10Btn" class="btn" style="padding:6px 8px;font-size:12px">Top 10</button>
+                        </div>
+                      </div>
+                      <div id="topCoursesList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;max-height:300px;overflow:auto;padding-right:6px;color:#374151;font-size:14px">
+                        <!-- JS will populate list items here -->
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <canvas id="programChart"></canvas>
