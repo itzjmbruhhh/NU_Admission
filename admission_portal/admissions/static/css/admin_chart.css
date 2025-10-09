@@ -519,7 +519,7 @@
   color: white;
 }
 .btn-mint {
-  background: linear-gradient(90deg, #a7f3d0 0%, #34d399 100%);
+  background: linear-gradient(90deg, white 0%, white 100%);
   color: #042022;
   border: 1px solid rgba(16,185,129,0.12);
 }
