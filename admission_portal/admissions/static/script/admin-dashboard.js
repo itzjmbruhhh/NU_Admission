@@ -9,6 +9,38 @@ if (window.location.search.match(/(program=|status=|school_year=|page=)/)) {
   showSection("search");
 }
 document.addEventListener("DOMContentLoaded", function () {
+  // Top Courses buttons logic
+  // Dropdown logic for Program Popularity, Enrollment Chance, Top Courses
+  const chartDropdown = document.getElementById("programChartDropdown");
+  const chartTitle = document.getElementById("programChartTitle");
+  if (chartDropdown) {
+    chartDropdown.addEventListener("change", function () {
+      if (chartTitle) {
+        if (this.value === "popularity") chartTitle.textContent = "Program Popularity";
+        else if (this.value === "enrollment") chartTitle.textContent = "Enrollment Chance";
+        else if (this.value === "topcourses") chartTitle.textContent = "Top Courses";
+      }
+      if (this.value === "popularity") {
+        updatePieForTopN(null);
+        document.getElementById('topCoursesBtnGroup').style.display = 'none';
+      } else if (this.value === "enrollment") {
+        // Show Enrollment Chance pie chart with backend data
+        const bucketLabels = ["Below 40%", "40% and above", "70% and above", "90% and above"];
+        const bucketCounts = JSON.parse(document.getElementById("enrollment-chance-counts").textContent);
+        window.programChartInstance.data.labels = bucketLabels;
+        window.programChartInstance.data.datasets[0].data = bucketCounts;
+        window.programChartInstance.data.datasets[0].backgroundColor = pieColors.slice(0, bucketLabels.length);
+        window.programChartInstance.update();
+        document.getElementById('topCoursesBtnGroup').style.display = 'none';
+      } else if (this.value === "topcourses") {
+        // Show Top Courses pie chart (default to top 5)
+        updatePieForTopN(5);
+        document.getElementById('topCoursesBtnGroup').style.display = 'flex';
+      } else {
+        document.getElementById('topCoursesBtnGroup').style.display = 'none';
+      }
+    });
+  }
   // ==========================
   // Section Tab Activation on Page Load (pagination support)
   // ==========================
@@ -203,6 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Helper to update the pie chart for top N and include 'Other' slice
   let currentTopN = null; // null means show all
   function updatePieForTopN(n) {
+    const topCoursesBtnGroup = document.getElementById("topCoursesBtnGroup");
     if (!n) {
       // show all
       window.programChartInstance.data.labels = programLabels;
@@ -210,6 +243,13 @@ document.addEventListener("DOMContentLoaded", function () {
       window.programChartInstance.data.datasets[0].backgroundColor = pieColors;
       currentTopN = null;
       window.programChartInstance.update();
+        if (topCoursesBtnGroup) {
+          if (this.value === "topcourses") {
+            topCoursesBtnGroup.style.display = "flex";
+          } else {
+            topCoursesBtnGroup.style.display = "none";
+          }
+        }
       return;
     }
     const top = getTopN(programLabels, programData, n);
@@ -305,10 +345,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Dropdown toggle behavior (if dropdown exists)
     const topCoursesToggle = document.getElementById('topCoursesToggle');
     const topCoursesDropdown = document.getElementById('topCoursesDropdown');
-    const percentageToggle = document.getElementById('percentageToggle');
-    const percentageDropdown = document.getElementById('percentageDropdown');
-    const percentageList = document.getElementById('percentageList');
-    const percentAllBtn = document.getElementById('percentAllBtn');
     if (topCoursesToggle && topCoursesDropdown) {
       topCoursesToggle.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -323,163 +359,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!topCoursesDropdown.contains(ev.target) && ev.target !== topCoursesToggle) {
           topCoursesDropdown.style.display = 'none';
         }
-        if (percentageDropdown && !percentageDropdown.contains(ev.target) && ev.target !== percentageToggle) {
-          percentageDropdown.style.display = 'none';
-        }
       });
     }
 
   // Percentage dropdown toggle and population
-  if (percentageToggle && percentageDropdown) {
-    percentageToggle.addEventListener('click', function (e) {
-      e.stopPropagation();
-      const shown = percentageDropdown.style.display === 'block';
-      percentageDropdown.style.display = shown ? 'none' : 'block';
-      if (!shown) {
-        // populate with all percentages
-      if (percentageList) {
-        // CSS now handles scrollable behavior and sizing
-        percentageList.innerHTML = '';
-            const total = programData.reduce((s, v) => s + (Number(v) || 0), 0);
-            // find top program index (largest enrolled count)
-            let topIndex = -1;
-            let topValue = -1;
-            for (let i = 0; i < programLabels.length; i++) {
-              const v = Number(programData[i]) || 0;
-              if (v > topValue) {
-                topValue = v;
-                topIndex = i;
-              }
-            }
 
-            // Create a highlighted Top Course entry first (if any)
-            if (topIndex >= 0) {
-              const label = programLabels[topIndex];
-              const value = Number(programData[topIndex]) || 0;
-              const percent = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-              const topItem = document.createElement('div');
-              topItem.className = 'percentage-top-item';
-              const left = document.createElement('div');
-              left.style.display = 'flex';
-              left.style.alignItems = 'center';
-              left.style.gap = '10px';
-              const dot = document.createElement('span');
-              dot.className = 'dot dot-sm';
-              dot.style.backgroundColor = pieColors[topIndex];
-              const lbl = document.createElement('span');
-              lbl.innerHTML = `${label} <small>(Top)</small>`;
-              left.appendChild(dot);
-              left.appendChild(lbl);
-              const right = document.createElement('div');
-              right.textContent = `${percent}%`;
-              topItem.appendChild(left);
-              topItem.appendChild(right);
-              percentageList.appendChild(topItem);
-            }
-
-            // Then append the rest (exclude the top item to avoid duplication)
-            for (let i = 0; i < programLabels.length; i++) {
-              if (i === topIndex) continue;
-              const label = programLabels[i];
-              const value = Number(programData[i]) || 0;
-              const percent = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-              const item = document.createElement('div');
-              item.className = 'percentage-item';
-              const left = document.createElement('div');
-              left.style.display = 'flex';
-              left.style.alignItems = 'center';
-              left.style.gap = '8px';
-              const dot = document.createElement('span');
-              dot.className = 'dot';
-              dot.style.backgroundColor = pieColors[i];
-              const lbl = document.createElement('span');
-              lbl.className = 'label';
-              lbl.textContent = label;
-              left.appendChild(dot);
-              left.appendChild(lbl);
-              const right = document.createElement('div');
-              right.className = 'value';
-              right.textContent = `${percent}%`;
-              item.appendChild(left);
-              item.appendChild(right);
-              percentageList.appendChild(item);
-            }
-          }
-      }
-    });
-  }
-
-  if (percentAllBtn) {
-    percentAllBtn.addEventListener('click', function () {
-      // show full pie and ensure list populated
-      updatePieForTopN(null);
-      if (percentageList) {
-        // CSS handles scroll behavior
-        percentageList.innerHTML = '';
-        const total = programData.reduce((s, v) => s + (Number(v) || 0), 0);
-        // find top program index
-        let topIndex = -1;
-        let topValue = -1;
-        for (let i = 0; i < programLabels.length; i++) {
-          const v = Number(programData[i]) || 0;
-          if (v > topValue) {
-            topValue = v;
-            topIndex = i;
-          }
-        }
-        if (topIndex >= 0) {
-          const label = programLabels[topIndex];
-          const value = Number(programData[topIndex]) || 0;
-          const percent = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-          const topItem = document.createElement('div');
-          topItem.className = 'percentage-top-item';
-          const leftTop = document.createElement('div');
-          leftTop.style.display = 'flex';
-          leftTop.style.alignItems = 'center';
-          leftTop.style.gap = '10px';
-          const topDot = document.createElement('span');
-          topDot.className = 'dot dot-sm';
-          topDot.style.backgroundColor = pieColors[topIndex];
-          const topLbl = document.createElement('span');
-          topLbl.innerHTML = `${label} <small>(Top)</small>`;
-          leftTop.appendChild(topDot);
-          leftTop.appendChild(topLbl);
-          const rightTop = document.createElement('div');
-          rightTop.textContent = `${percent}%`;
-          topItem.appendChild(leftTop);
-          topItem.appendChild(rightTop);
-          percentageList.appendChild(topItem);
-        }
-        for (let i = 0; i < programLabels.length; i++) {
-          if (i === topIndex) continue;
-          const label = programLabels[i];
-          const value = Number(programData[i]) || 0;
-          const percent = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-          const item = document.createElement('div');
-          item.className = 'percentage-item';
-          const left = document.createElement('div');
-          left.style.display = 'flex';
-          left.style.alignItems = 'center';
-          left.style.gap = '8px';
-          const dot = document.createElement('span');
-          dot.className = 'dot';
-          dot.style.backgroundColor = pieColors[i];
-          const lbl = document.createElement('span');
-          lbl.className = 'label';
-          lbl.textContent = label;
-          left.appendChild(dot);
-          left.appendChild(lbl);
-          const right = document.createElement('div');
-          right.className = 'value';
-          right.textContent = `${percent}%`;
-          item.appendChild(left);
-          item.appendChild(right);
-          percentageList.appendChild(item);
-        }
-      }
-      if (percentageDropdown) percentageDropdown.style.display = 'block';
-    });
-  }
 
   // ==========================
   // Admission Success Rate
