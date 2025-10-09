@@ -1,0 +1,25 @@
+1. Clone Repository
+git clone https://github.com/itzjmbruhhh/NU_Admission.git
+cd NU_Admission/admission_portal
+
+2. Create Virtual Environment
+python3 -m venv venv
+source venv/bin/activate   
+venv\Scripts\activate     
+
+3. Install Dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+4. Apply Migrations
+python manage.py makemigrations
+python manage.py migrate
+
+5. Create Superuser (Admin)
+python manage.py createsuperuser
+
+
+→ Follow prompts to set up an admin account.
+
+6. Run Development Server
+python manage.py runserver

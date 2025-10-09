@@ -9,6 +9,38 @@ if (window.location.search.match(/(program=|status=|school_year=|page=)/)) {
   showSection("search");
 }
 document.addEventListener("DOMContentLoaded", function () {
+  // Top Courses buttons logic
+  // Dropdown logic for Program Popularity, Enrollment Chance, Top Courses
+  const chartDropdown = document.getElementById("programChartDropdown");
+  const chartTitle = document.getElementById("programChartTitle");
+  if (chartDropdown) {
+    chartDropdown.addEventListener("change", function () {
+      if (chartTitle) {
+        if (this.value === "popularity") chartTitle.textContent = "Program Popularity";
+        else if (this.value === "enrollment") chartTitle.textContent = "Enrollment Chance";
+        else if (this.value === "topcourses") chartTitle.textContent = "Top Courses";
+      }
+      if (this.value === "popularity") {
+        updatePieForTopN(null);
+        document.getElementById('topCoursesBtnGroup').style.display = 'none';
+      } else if (this.value === "enrollment") {
+        // Show Enrollment Chance pie chart with backend data
+        const bucketLabels = ["Below 40%", "40% and above", "70% and above", "90% and above"];
+        const bucketCounts = JSON.parse(document.getElementById("enrollment-chance-counts").textContent);
+        window.programChartInstance.data.labels = bucketLabels;
+        window.programChartInstance.data.datasets[0].data = bucketCounts;
+        window.programChartInstance.data.datasets[0].backgroundColor = pieColors.slice(0, bucketLabels.length);
+        window.programChartInstance.update();
+        document.getElementById('topCoursesBtnGroup').style.display = 'none';
+      } else if (this.value === "topcourses") {
+        // Show Top Courses pie chart (default to top 5)
+        updatePieForTopN(5);
+        document.getElementById('topCoursesBtnGroup').style.display = 'flex';
+      } else {
+        document.getElementById('topCoursesBtnGroup').style.display = 'none';
+      }
+    });
+  }
   // ==========================
   // Section Tab Activation on Page Load (pagination support)
   // ==========================
@@ -93,11 +125,79 @@ document.addEventListener("DOMContentLoaded", function () {
   for (let i = 0; i < programLabels.length; i++) {
     pieColors.push(programColors[i % programColors.length]);
   }
-  // Set chart width larger
+  // Small helper to draw rounded rectangles
+  function roundRect(ctx, x, y, w, h, r) {
+    const minSize = Math.min(w, h);
+    if (r > minSize / 2) r = minSize / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Plugin: draw a small percentage badge above the hovered pie slice
+  const sliceBadgePlugin = {
+    id: 'sliceBadgePlugin',
+    afterDraw: (chart) => {
+      try {
+        const tooltip = chart.tooltip;
+        if (!tooltip || !tooltip._active || tooltip._active.length === 0) return;
+        // Use the first active element
+        const active = tooltip._active[0];
+        const datasetIndex = active.datasetIndex;
+        const index = active.index;
+        const meta = chart.getDatasetMeta(datasetIndex);
+        if (!meta) return;
+        const arc = meta.data[index];
+        if (!arc) return;
+        const pos = arc.tooltipPosition ? arc.tooltipPosition() : { x: arc.x, y: arc.y };
+        const dataset = chart.data.datasets[datasetIndex];
+        const value = Number(dataset.data[index]) || 0;
+        const total = dataset.data.reduce((s, v) => s + (Number(v) || 0), 0);
+        const percent = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0.0%';
+
+        const ctx = chart.ctx;
+        ctx.save();
+        // badge style
+        const text = percent;
+        ctx.font = '700 12px Arial';
+        ctx.fillStyle = 'rgba(6,95,70,0.95)';
+        const padding = 8;
+        const textWidth = ctx.measureText(text).width;
+        const w = textWidth + padding * 2;
+        const h = 22;
+        // position badge above the arc; use arc.outerRadius if available
+        const outer = arc.outerRadius || (chart.innerRadius ? chart.innerRadius + 40 : 60);
+        let x = pos.x - w / 2;
+        let y = pos.y - outer - h - 8;
+        // if too high, place below the arc
+        if (y < 10) y = pos.y + outer + 8;
+        // draw rounded rect
+        roundRect(ctx, x, y, w, h, 8);
+        // draw text
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, x + w / 2, y + h / 2);
+        ctx.restore();
+      } catch (e) {
+        // swallow drawing errors
+      }
+    },
+  };
+  // register plugin
+  if (window.Chart && Chart.register) {
+    try { Chart.register(sliceBadgePlugin); } catch(e) { /* ignore if already registered */ }
+  }
+  // Set chart width larger and keep instance for updates
   const programChartCanvas = document.getElementById("programChart");
   programChartCanvas.width = 600;
   programChartCanvas.height = 400;
-  new Chart(programChartCanvas.getContext("2d"), {
+  window.programChartInstance = new Chart(programChartCanvas.getContext("2d"), {
     type: "pie",
     data: {
       labels: programLabels,
@@ -123,6 +223,147 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     },
   });
+
+  // Helper to compute top N entries from labels+data
+  function getTopN(labels, data, n) {
+    // build array of {label, value}
+    const arr = labels.map((l, i) => ({ label: l, value: Number(data[i]) || 0 }));
+    arr.sort((a, b) => b.value - a.value);
+    return arr.slice(0, n);
+  }
+
+  // Helper to update the pie chart for top N and include 'Other' slice
+  let currentTopN = null; // null means show all
+  function updatePieForTopN(n) {
+    const topCoursesBtnGroup = document.getElementById("topCoursesBtnGroup");
+    if (!n) {
+      // show all
+      window.programChartInstance.data.labels = programLabels;
+      window.programChartInstance.data.datasets[0].data = programData;
+      window.programChartInstance.data.datasets[0].backgroundColor = pieColors;
+      currentTopN = null;
+      window.programChartInstance.update();
+        if (topCoursesBtnGroup) {
+          if (this.value === "topcourses") {
+            topCoursesBtnGroup.style.display = "flex";
+          } else {
+            topCoursesBtnGroup.style.display = "none";
+          }
+        }
+      return;
+    }
+    const top = getTopN(programLabels, programData, n);
+    const topLabels = top.map((t) => t.label);
+    const topValues = top.map((t) => t.value);
+    const total = programData.reduce((s, v) => s + (Number(v) || 0), 0);
+    const topSum = topValues.reduce((s, v) => s + v, 0);
+    const other = Math.max(0, total - topSum);
+    const labels = [...topLabels];
+    const values = [...topValues];
+    const colors = pieColors.slice(0, topLabels.length);
+    if (other > 0) {
+      labels.push('Other programs');
+      values.push(other);
+      colors.push('#9ca3af');
+    }
+    window.programChartInstance.data.labels = labels;
+    window.programChartInstance.data.datasets[0].data = values;
+    window.programChartInstance.data.datasets[0].backgroundColor = colors;
+    currentTopN = n;
+    window.programChartInstance.update();
+  }
+
+    // --- Top Courses panel population and wiring ---
+    function populateTopCourses(n) {
+      // Prefer dropdown list if available
+      const container = document.getElementById('topCoursesList');
+      if (!container) return;
+      const total = programData.reduce((s, v) => s + (Number(v) || 0), 0);
+      const top = getTopN(programLabels, programData, n);
+      container.innerHTML = '';
+      top.forEach((t, idx) => {
+        const percent = total > 0 ? ((t.value / total) * 100).toFixed(1) : '0.0';
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
+        item.style.padding = '6px 4px';
+        item.style.borderRadius = '6px';
+        item.style.cursor = 'default';
+        item.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:${pieColors[idx]};"></span>
+            <span style="font-weight:600;color:#0f172a">${t.label}</span>
+          </div>
+          <div style="text-align:right;color:#6b7280">${t.value} <small style=\"color:#9ca3af\">(${percent}%)</small></div>
+        `;
+        container.appendChild(item);
+      });
+
+      const topSum = top.reduce((s, x) => s + x.value, 0);
+      const other = total - topSum;
+      if (other > 0) {
+        const percent = total > 0 ? ((other / total) * 100).toFixed(1) : '0.0';
+        const otherItem = document.createElement('div');
+        otherItem.style.display = 'flex';
+        otherItem.style.justifyContent = 'space-between';
+        otherItem.style.alignItems = 'center';
+        otherItem.style.padding = '6px 4px';
+        otherItem.style.borderRadius = '6px';
+        otherItem.style.marginTop = '6px';
+        otherItem.style.borderTop = '1px dashed rgba(0,0,0,0.06)';
+        otherItem.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#9ca3af;"></span>
+            <span style="font-weight:600;color:#0f172a">Other programs</span>
+          </div>
+          <div style="text-align:right;color:#6b7280">${other} <small style=\"color:#9ca3af\">(${percent}%)</small></div>
+        `;
+        container.appendChild(otherItem);
+      }
+    }
+
+    // Wire Top 5 / Top 10 buttons to update pie and dropdown list
+    const top5Btn = document.getElementById('top5Btn');
+    const top10Btn = document.getElementById('top10Btn');
+    if (top5Btn) {
+      top5Btn.addEventListener('click', function () {
+        updatePieForTopN(5);
+        populateTopCourses(5);
+      });
+    }
+    if (top10Btn) {
+      top10Btn.addEventListener('click', function () {
+        updatePieForTopN(10);
+        populateTopCourses(10);
+      });
+    }
+
+    // Populate dropdown list on first paint (so it has content)
+    populateTopCourses(5);
+
+    // Dropdown toggle behavior (if dropdown exists)
+    const topCoursesToggle = document.getElementById('topCoursesToggle');
+    const topCoursesDropdown = document.getElementById('topCoursesDropdown');
+    if (topCoursesToggle && topCoursesDropdown) {
+      topCoursesToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const shown = topCoursesDropdown.style.display === 'block';
+        topCoursesDropdown.style.display = shown ? 'none' : 'block';
+    // refresh content when showing
+    if (!shown) populateTopCourses(currentTopN || 5);
+      });
+
+      // Close on outside click
+      document.addEventListener('click', function (ev) {
+        if (!topCoursesDropdown.contains(ev.target) && ev.target !== topCoursesToggle) {
+          topCoursesDropdown.style.display = 'none';
+        }
+      });
+    }
+
+  // Percentage dropdown toggle and population
+
 
   // ==========================
   // Admission Success Rate
