@@ -70,7 +70,8 @@ def adminDash(request):
     program = request.GET.get('program')
     school_year = request.GET.get('school_year')
     status = request.GET.get('status')
-    enroll_chance = request.GET.get('enroll_chance')
+    enroll_chance_from = request.GET.get('enroll_chance_from')
+    enroll_chance_to = request.GET.get('enroll_chance_to')
     student_type = request.GET.get('student_type')
 
     # Order by latest registration (most recent first)
@@ -86,15 +87,15 @@ def adminDash(request):
     if student_id:
         students = students.filter(student_id__icontains=student_id)
 
-    # Enrollment chance threshold filters (now stored as percentage 0..100)
-    if enroll_chance == 'lt_40':
-        students = students.filter(enrollment_chance__lt=40)
-    elif enroll_chance == 'gte_40':
-        students = students.filter(enrollment_chance__gte=40)
-    elif enroll_chance == 'gte_70':
-        students = students.filter(enrollment_chance__gte=70)
-    elif enroll_chance == 'gte_90':
-        students = students.filter(enrollment_chance__gte=90)
+    # Enrollment chance range filter
+    if enroll_chance_from and enroll_chance_to:
+        try:
+            from_val = float(enroll_chance_from)
+            to_val = float(enroll_chance_to)
+            if to_val >= from_val:
+                students = students.filter(enrollment_chance__gte=from_val, enrollment_chance__lte=to_val)
+        except ValueError:
+            pass
 
     # ✅ Filter by student type
     if student_type:
@@ -206,7 +207,8 @@ def adminDash(request):
         'selected_program': program,
         'selected_status': status,
         'selected_school_year': school_year,
-        'selected_enroll_chance': enroll_chance,
+        'selected_enroll_chance': enroll_chance_from,
+        'selected_enroll_chance': enroll_chance_to,
         'selected_student_type': student_type,
         'current_enrolled_count': current_enrolled_count,
         'current_year': current_year,
@@ -218,13 +220,19 @@ def adminDash(request):
         'female_enrolled_percent': female_enrolled_percent,
         'top_program': top_program,
         'top_program_count': top_program_count,
-    'top_program_abbrev': top_program_abbrev,
+        'top_program_abbrev': top_program_abbrev,
         'academic_year_labels': academic_year_labels,
         'academic_year_data': academic_year_data,
         'program_labels': program_labels,
         'program_data': program_data,
         'admission_labels': admission_labels,
         'admission_data': admission_data,
+            'enrollment_chance_counts': [
+                Student.objects.filter(enrollment_chance__lt=40).count(),
+                Student.objects.filter(enrollment_chance__gte=40, enrollment_chance__lt=70).count(),
+                Student.objects.filter(enrollment_chance__gte=70, enrollment_chance__lt=90).count(),
+                Student.objects.filter(enrollment_chance__gte=90).count(),
+            ],
     }
     return render(request, 'admin.html', context)
 
