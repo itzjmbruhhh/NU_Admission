@@ -114,42 +114,21 @@
             <!-- Program Popularity (Pie with %) and Top Courses dropdown -->
             <div class="chart-container medium" style="padding:12px; position:relative;">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                <h3 style="margin:0"><i class="fas fa-book"></i> Program Popularity</h3>
+                <h3 style="margin:0"><i class="fas fa-book"></i> <span id="programChartTitle">Program Popularity</span></h3>
                 <div style="display:flex;align-items:center;gap:12px;position:relative">
-                  <!-- Separate Percentage dropdown trigger -->
-                    <div style="position:relative;margin-right:8px;">
-                    <button id="percentageToggle" class="btn btn-mint" style="padding:6px 10px;font-size:13px">Enrollment Chance▾</button>
-                    <div id="percentageDropdown" style="display:none;position:absolute;right:0;top:40px;width:320px;background:#fff;border-radius:8px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 6px 18px rgba(15,23,42,0.08);z-index:60;padding:10px;">
-                      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                        <h4 style="margin:0;font-size:15px;color:#0f172a">Percentage</h4>
-                        <div style="display:flex;gap:6px;align-items:center">
-                          <button id="percentAllBtn" class="btn" style="padding:6px 8px;font-size:12px">All %</button>
-                        </div>
-                      </div>
-                      <div id="percentageList">
-                        <!-- JS will populate percentage entries here -->
-                      </div>
-                    </div>
-                  </div>
-                  <!-- Top Courses dropdown trigger -->
-                  <div style="position:relative;">
-                    <button id="topCoursesToggle" class="btn btn-mint" style="padding:6px 10px;font-size:13px">Top Courses ▾</button>
-                    <div id="topCoursesDropdown" style="display:none;position:absolute;right:0;top:40px;width:320px;background:#fff;border-radius:8px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 6px 18px rgba(15,23,42,0.08);z-index:60;padding:10px;">
-                      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                        <h4 style="margin:0;font-size:15px;color:#0f172a">Top Courses</h4>
-                        <div style="display:flex;gap:6px;align-items:center">
-                          <button id="top5Btn" class="btn" style="padding:6px 8px;font-size:12px">Top 5</button>
-                          <button id="top10Btn" class="btn" style="padding:6px 8px;font-size:12px">Top 10</button>
-                        </div>
-                      </div>
-                      <div id="topCoursesList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;max-height:300px;overflow:auto;padding-right:6px;color:#374151;font-size:14px">
-                        <!-- JS will populate list items here -->
-                      </div>
-                    </div>
+                  <select id="programChartDropdown" class="btn btn-mint" style="padding:6px 10px;font-size:13px">
+                    <option value="popularity">Program Popularity</option>
+                    <option value="enrollment">Enrollment Chance</option>
+                    <option value="topcourses">Top Courses</option>
+                  </select>
+                  <div id="topCoursesBtnGroup" style="display:none;gap:6px;align-items:center">
+                    <button id="top5Btn" class="btn" style="padding:6px 8px;font-size:12px">Top 5</button>
+                    <button id="top10Btn" class="btn" style="padding:6px 8px;font-size:12px">Top 10</button>
                   </div>
                 </div>
               </div>
               <canvas id="programChart"></canvas>
+            {{ enrollment_chance_counts|json_script:"enrollment-chance-counts" }}
             </div>
             {{ program_labels|json_script:"program-labels" }}
             {{ program_data|json_script:"program-data" }}
@@ -209,13 +188,23 @@
                     </select>
                   </div>
                   <div class="filter-group enrollment" style="min-width:180px;">
-                    <label>Enrollment Chance</label>
-                    <select name="enroll_chance">
-                      <option value="">All</option>
-                      <option value="lt_40" {% if selected_enroll_chance == "lt_40" %}selected{% endif %}>Below 40%</option>
-                      <option value="gte_40" {% if selected_enroll_chance == "gte_40" %}selected{% endif %}>40% and above</option>
-                      <option value="gte_70" {% if selected_enroll_chance == "gte_70" %}selected{% endif %}>70% and above</option>
-                      <option value="gte_90" {% if selected_enroll_chance == "gte_90" %}selected{% endif %}>90% and above</option>
+                    <label>Enrollment Chance (From)</label>
+                    <select name="enroll_chance_from">
+                      <option value="">From</option>
+                      <option value="0" {% if request.GET.enroll_chance_from == "0" %}selected{% endif %}>0%</option>
+                      <option value="40" {% if request.GET.enroll_chance_from == "40" %}selected{% endif %}>40%</option>
+                      <option value="70" {% if request.GET.enroll_chance_from == "70" %}selected{% endif %}>70%</option>
+                      <option value="90" {% if request.GET.enroll_chance_from == "90" %}selected{% endif %}>90%</option>
+                    </select>
+                  </div>
+                  <div class="filter-group enrollment" style="min-width:180px;">
+                    <label>Enrollment Chance (To)</label>
+                    <select name="enroll_chance_to">
+                      <option value="">To</option>
+                      <option value="40" {% if request.GET.enroll_chance_to == "40" %}selected{% endif %}>40%</option>
+                      <option value="70" {% if request.GET.enroll_chance_to == "70" %}selected{% endif %}>70%</option>
+                      <option value="90" {% if request.GET.enroll_chance_to == "90" %}selected{% endif %}>90%</option>
+                      <option value="100" {% if request.GET.enroll_chance_to == "100" %}selected{% endif %}>100%</option>
                     </select>
                   </div>
                   <div class="filter-group student-type" style="min-width:180px; align-self: flex-end;">
