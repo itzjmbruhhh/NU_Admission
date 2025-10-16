@@ -1,0 +1,122 @@
+/* ================================
+   Smart Admission - Import/Export Section
+   File: admin_importexport.css
+   ================================ */
+
+/* Overall Section */
+#importExport {
+  padding: 25px;
+  background: #f5f7fa;
+  font-family: "Poppins", sans-serif;
+  color: #333;
+}
+
+/* Section Title */
+#importExport h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a73e8;
+  margin-bottom: 15px;
+}
+
+/* Cards */
+#importExport .card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+/* Subtitles inside cards */
+#importExport .card h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+  border-left: 4px solid #1a73e8;
+  padding-left: 10px;
+}
+
+/* Buttons */
+#importExport .btn {
+  display: inline-block;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+#importExport .btn.primary {
+  background: #1a73e8;
+  color: #fff;
+}
+
+#importExport .btn.primary:hover {
+  background: #155ab6;
+}
+
+#importExport .btn.secondary {
+  background: #f0f4f8;
+  color: #333;
+  border: 1px solid #d1d9e6;
+}
+
+#importExport .btn.secondary:hover {
+  background: #e4ebf3;
+}
+
+/* File Input Styling */
+#importExport input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d9e6;
+  border-radius: 8px;
+  background-color: #fafbfc;
+  margin-bottom: 15px;
+}
+
+/* Table Styling */
+#importExport table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#importExport table thead {
+  background-color: #1a73e8;
+  color: white;
+}
+
+#importExport th,
+#importExport td {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+#importExport tr:hover {
+  background-color: #f8faff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  #importExport {
+    padding: 15px;
+  }
+
+  #importExport .btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  #importExport table {
+    font-size: 0.9rem;
+  }
+}

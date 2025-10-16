@@ -4,7 +4,7 @@ def student_detail(request, pk):
     return render(request, 'student_detail.html', {'student': student})
 # admissions/views.py
 from django.shortcuts import render, redirect
-from django.db.models import Q
+from django.db.models import Q      
 from .models import Student
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
@@ -12,7 +12,13 @@ from django.core.paginator import Paginator
 from .models  import Student
 from .utils import write_feature_json
 from .ml_utils import compute_and_save_enrollment_chance
-
+import os
+import pandas as pd
+from django.http import HttpResponse
+from django.shortcuts import render
+from joblib import load  # Use joblib to load the trained model
+from django.conf import settings
+import csv
 
 def index(request):
     return render(request, 'index.html')
@@ -376,6 +382,81 @@ def register_student(request):
         )
 
     return render(request, "registration.html")
+
+def import_export(request):
+    if request.method == "POST" and request.FILES.get("importFile"):
+        uploaded_file = request.FILES["importFile"]
+        file_path = os.path.join(settings.MEDIA_ROOT, uploaded_file.name)
+
+        # Save uploaded file temporarily
+        with open(file_path, "wb") as f:
+            for chunk in uploaded_file.chunks():
+                f.write(chunk)
+
+        # Load trained model
+        model_path = os.path.join(settings.BASE_DIR, "admissions", "resources", "rf_ucModel.pkl")
+        model = load(model_path)
+
+        try:
+            # Read uploaded CSV
+            data_original = pd.read_csv(file_path)  # Keep a clean copy for readable output
+            data = data_original.copy()
+
+            # Get expected model features
+            model_features = getattr(model, "feature_names_in_", None)
+            if model_features is None:
+                return render(request, "import_export.html", {
+                    "error": "Model does not have 'feature_names_in_'. Please retrain the model with sklearn ≥1.0."
+                })
+
+            # Encode categorical columns (basic auto-detection)
+            for col in data.columns:
+                if data[col].dtype == "object":
+                    data[col] = data[col].astype("category").cat.codes
+
+            # Add missing columns with 0s
+            missing_cols = set(model_features) - set(data.columns)
+            for col in missing_cols:
+                data[col] = 0
+
+            # Reorder to match model’s training columns
+            data = data[model_features]
+
+            # Predict probabilities
+            predictions = model.predict_proba(data)[:, 1] * 100
+
+            # Append predictions to original readable dataframe
+            data_original["Enrollment Chance (%)"] = predictions.round(2)
+
+        except Exception as e:
+            return render(request, "import_export.html", {"error": f"Error making predictions: {e}"})
+
+        # Save results to CSV
+        output_file_path = os.path.join(settings.MEDIA_ROOT, "predictions.csv")
+        data_original.to_csv(output_file_path, index=False)
+
+        # Return as downloadable file
+        with open(output_file_path, "rb") as f:
+            response = HttpResponse(f.read(), content_type="text/csv")
+            response["Content-Disposition"] = 'attachment; filename=\"predictions.csv\"'
+            return response
+
+    return render(request, "import_export.html")
+
+
+def export_csv(request):
+    # Path to the predictions file
+    output_file_path = os.path.join(settings.MEDIA_ROOT, "predictions.csv")
+
+    # Check if the file exists
+    if not os.path.exists(output_file_path):
+        return HttpResponse("No predictions file found. Please upload and process a file first.")
+
+    # Return the file as a downloadable response
+    with open(output_file_path, "rb") as f:
+        response = HttpResponse(f.read(), content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="predictions.csv"'
+        return response
 
 # Optional future improvement:
 # Instead of calling compute_and_save_enrollment_chance inside the view, you can
