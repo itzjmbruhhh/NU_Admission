@@ -10,6 +10,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="{% static 'css/admin_chart.css' %}?{% now 'U' %}" />
+    <link rel="stylesheet" href="{% static 'css/admin_importexport.css' %}?{% now 'U' %}" /> 
   </head>
   <body>
     <div class="admin-page">
@@ -38,6 +39,9 @@
         <section class="section-tabs">
           <button class="tab-btn" onclick="showSection('search')">
             <i class="fas fa-search"></i> Student Records
+          </button>
+          <button class="tab-btn" onclick="showSection('importExport')">
+            <i class="fas fa-file-import"></i> Import & Export
           </button>
           <button class="tab-btn active" onclick="showSection('overview')">
             <i class="fas fa-chart-line"></i> Overview & Analytics
@@ -395,8 +399,46 @@
      
 
         </div>
-      </main>
-    </div>
+
+        <!-- Import & Export Section -->
+<section id="importExport" class="section-content">
+  <div class="card">
+    <h2><i class="fas fa-file-import"></i> Import & Export Predictions</h2>
+
+    <form method="POST" enctype="multipart/form-data" action="{% url 'import_export' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="importFile">Select a CSV File</label>
+        <input type="file" id="importFile" name="importFile" accept=".csv" required />
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn primary">
+          <i class="fas fa-upload"></i> Import and Predict
+        </button>
+      </div>
+    </form>
+
+    {% if error %}
+      <div class="alert alert-danger">
+        <strong>Error:</strong> {{ error }}
+      </div>
+    {% endif %}
+
+    {% if success %}
+      <div class="alert alert-success">
+        <strong>Success:</strong> {{ success }}
+      </div>
+
+      <div class="button-group" style="margin-top:10px;">
+        <a href="{% url 'export_csv' %}" class="btn secondary">
+          <i class="fas fa-download"></i> Download Predictions CSV
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

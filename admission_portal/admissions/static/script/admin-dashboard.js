@@ -467,17 +467,32 @@ new Chart(document.getElementById("admissionChart").getContext("2d"), {
 // Section Tab Switching
 // ==========================
 function showSection(id) {
-  document.querySelectorAll(".section-content").forEach((sec) => {
-    sec.classList.remove("active");
+  // Hide all sections and reset their visibility
+  document.querySelectorAll(".section-content").forEach((section) => {
+    section.classList.remove("active");
+    section.style.opacity = "0"; // Fade out animation
+    section.style.transition = "opacity 0.3s ease"; // Smooth transition
   });
-  document.getElementById(id).classList.add("active");
 
-  document
-    .querySelectorAll(".tab-btn")
-    .forEach((btn) => btn.classList.remove("active"));
-  document
-    .querySelector(`.tab-btn[onclick="showSection('${id}')"]`)
-    .classList.add("active");
+  // Show the selected section with a fade-in effect
+  const selectedSection = document.getElementById(id);
+  if (selectedSection) {
+    setTimeout(() => {
+      selectedSection.classList.add("active");
+      selectedSection.style.opacity = "1"; // Fade in animation
+    }, 300); // Delay to allow fade-out to complete
+  }
+
+  // Remove the 'active' class from all tab buttons
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.classList.remove("active");
+  });
+
+  // Add the 'active' class to the clicked tab button
+  const activeButton = document.querySelector(`.tab-btn[onclick="showSection('${id}')"]`);
+  if (activeButton) {
+    activeButton.classList.add("active");
+  }
 }
 window.showSection = showSection;
 

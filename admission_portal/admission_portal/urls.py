@@ -16,15 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from admissions.views import index, loginAdmin, adminDash, register_student, student_detail
+from admissions.views import index, loginAdmin, adminDash, register_student, student_detail, import_export, export_csv
 
 urlpatterns = [
     path('super_admin/', admin.site.urls),
     path('loginAdmin/', loginAdmin, name='loginAdmin'),
+    path('import_export/', import_export, name='import_export'),
+    path('export_csv/', export_csv, name='export_csv'),  # Add this line
     path('adminDash/', adminDash, name='landingAdmin'),
-    # Registration endpoint handles GET (form) and POST (save) via register_student
     path('register/', register_student, name='register'),
     path('student/<int:pk>/', student_detail, name='student_detail'),
-    path('', index, name='index')
-
+    path('', index, name='index'),
 ]
